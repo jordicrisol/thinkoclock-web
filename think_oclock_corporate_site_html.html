@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Think O'Clock</title>
+    <meta
+      name="description"
+      content="Think O’Clock és una consultora especialitzada en estratègia política i electoral."
+    />
+    <style>
+      :root {
+        --bg: #f7f7f5;
+        --surface: #ffffff;
+        --text: #171717;
+        --muted: #5f5f5f;
+        --line: rgba(0, 0, 0, 0.1);
+        --brand: #1f4d4d;
+        --brand-soft: rgba(31, 77, 77, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .container {
+        width: min(1120px, calc(100% - 48px));
+        margin: 0 auto;
+      }
+
+      .section {
+        padding: 88px 0;
+      }
+
+      .eyebrow {
+        font-size: 13px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--brand);
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: blur(10px);
+        background: rgba(247, 247, 245, 0.88);
+        border-bottom: 1px solid transparent;
+      }
+
+      .site-header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 82px;
+      }
+
+      .brand {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--brand);
+        letter-spacing: 0.01em;
+      }
+
+      .nav {
+        display: flex;
+        gap: 28px;
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      .nav a:hover {
+        color: var(--text);
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top left, rgba(31, 77, 77, 0.08), transparent 38%);
+        pointer-events: none;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 56px;
+        align-items: center;
+        padding: 96px 0 110px;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: clamp(42px, 6vw, 68px);
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+        max-width: 760px;
+      }
+
+      .hero-copy p {
+        margin-top: 24px;
+        max-width: 620px;
+        font-size: 20px;
+        line-height: 1.75;
+        color: var(--muted);
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 14px;
+        margin-top: 34px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 24px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: transform 0.18s ease, opacity 0.18s ease, background 0.18s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn-primary {
+        background: var(--brand);
+        color: white;
+      }
+
+      .btn-secondary {
+        border: 1px solid var(--line);
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.45);
+      }
+
+      .hero-visual {
+        position: relative;
+        min-height: 440px;
+        border-radius: 32px;
+        overflow: hidden;
+        background:
+          linear-gradient(rgba(31, 77, 77, 0.34), rgba(31, 77, 77, 0.34)),
+          url('https://images.unsplash.com/photo-1526779259212-756e1f0f9f9b?auto=format&fit=crop&w=1400&q=80') center/cover;
+        box-shadow: 0 20px 60px rgba(31, 77, 77, 0.12);
+      }
+
+      .hero-card {
+        position: absolute;
+        right: 24px;
+        bottom: 24px;
+        width: min(320px, calc(100% - 48px));
+        padding: 22px 22px 20px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        border-radius: 24px;
+        backdrop-filter: blur(8px);
+      }
+
+      .hero-card .eyebrow {
+        color: var(--brand);
+      }
+
+      .hero-card p {
+        margin-top: 8px;
+        font-size: 16px;
+        line-height: 1.6;
+        color: #2f2f2f;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 56px;
+        align-items: start;
+      }
+
+      .intro-title,
+      .method-title,
+      .contact-title {
+        font-size: clamp(32px, 4vw, 46px);
+        line-height: 1.08;
+        letter-spacing: -0.035em;
+      }
+
+      .lead {
+        font-size: 19px;
+        line-height: 1.9;
+        color: var(--muted);
+      }
+
+      .services-wrap {
+        background: var(--surface);
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .services-head {
+        margin-bottom: 34px;
+      }
+
+      .services-title {
+        margin-top: 12px;
+        font-size: clamp(30px, 4vw, 44px);
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+      }
+
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+      }
+
+      .service-card {
+        padding: 28px;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: linear-gradient(180deg, rgba(31, 77, 77, 0.03), rgba(255, 255, 255, 0.85));
+      }
+
+      .service-card h3 {
+        font-size: 22px;
+        line-height: 1.2;
+      }
+
+      .service-card p {
+        margin-top: 14px;
+        color: var(--muted);
+        line-height: 1.8;
+        font-size: 16px;
+      }
+
+      .method-panel {
+        padding: 34px;
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(31, 77, 77, 0.08), rgba(31, 77, 77, 0.03));
+        border: 1px solid rgba(31, 77, 77, 0.12);
+      }
+
+      .method-list {
+        list-style: none;
+        padding: 0;
+        margin: 22px 0 0;
+      }
+
+      .method-list li {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        padding: 16px 0;
+        border-top: 1px solid rgba(31, 77, 77, 0.12);
+        color: var(--muted);
+        line-height: 1.75;
+      }
+
+      .method-list li:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .method-number {
+        flex: 0 0 auto;
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--brand);
+        color: white;
+        font-size: 13px;
+        font-weight: 700;
+        margin-top: 2px;
+      }
+
+      .method-copy strong {
+        display: block;
+        color: var(--text);
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      .contact {
+        background: var(--brand);
+        color: white;
+      }
+
+      .contact-grid {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 32px;
+        align-items: end;
+      }
+
+      .contact p {
+        margin-top: 16px;
+        color: rgba(255, 255, 255, 0.82);
+        line-height: 1.8;
+        max-width: 620px;
+      }
+
+      .contact .btn-primary {
+        background: white;
+        color: var(--text);
+      }
+
+      .footer {
+        padding: 24px 0 42px;
+        color: #7a7a7a;
+        font-size: 14px;
+      }
+
+      @media (max-width: 980px) {
+        .hero-grid,
+        .split,
+        .contact-grid,
+        .services-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-grid {
+          padding: 72px 0 84px;
+        }
+
+        .hero-visual {
+          min-height: 360px;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .container {
+          width: min(1120px, calc(100% - 32px));
+        }
+
+        .site-header-inner {
+          min-height: 74px;
+        }
+
+        .nav {
+          display: none;
+        }
+
+        .section {
+          padding: 68px 0;
+        }
+
+        .hero-copy p,
+        .lead {
+          font-size: 17px;
+        }
+
+        .hero-card {
+          position: static;
+          width: auto;
+          margin: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container site-header-inner">
+        <a class="brand" href="#top">Think O'Clock</a>
+        <nav class="nav">
+          <a href="#context">Context</a>
+          <a href="#serveis">Serveis</a>
+          <a href="#metode">Mètode</a>
+          <a href="#contacte">Contacte</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <div class="eyebrow">Consultoria política</div>
+            <h1>Estratègia política per guanyar context, relat i eleccions.</h1>
+            <p>
+              Think O’Clock és una consultora especialitzada en estratègia política i electoral.
+              Acompanyem lideratges, equips i organitzacions per convertir context en decisió,
+              relat en posició i campanya en resultat.
+            </p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#contacte">Parlem</a>
+              <a class="btn btn-secondary" href="#serveis">Veure serveis</a>
+            </div>
+          </div>
+
+          <div class="hero-visual" aria-label="Visual territorial">
+            <div class="hero-card">
+              <div class="eyebrow">Lectura del territori</div>
+              <p>
+                Estratègia rigorosa, expressió contemporània i una manera de treballar basada
+                en criteri, continuïtat i impacte real.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="context" class="section">
+        <div class="container split">
+          <div>
+            <div class="eyebrow">Context</div>
+            <h2 class="intro-title">Llegir el moment polític és la base de qualsevol estratègia guanyadora.</h2>
+          </div>
+          <div>
+            <p class="lead">
+              Treballem en entorns polítics complexos, amb governs consolidats, escenaris
+              fragmentats i competència intensa. En aquest context, construir lideratge, relat
+              i posició és clau per esdevenir alternativa real de govern o per exercir una
+              incidència útil i reconeixible.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="serveis" class="section services-wrap">
+        <div class="container">
+          <div class="services-head">
+            <div class="eyebrow">Serveis</div>
+            <h2 class="services-title">Estratègia, relat i execució.</h2>
+          </div>
+
+          <div class="services-grid">
+            <article class="service-card">
+              <h3>Estratègia política</h3>
+              <p>
+                Diagnòstic, posicionament i arquitectura de relat per a moments que demanen
+                lectura fina, decisió clara i visió de conjunt.
+              </p>
+            </article>
+
+            <article class="service-card">
+              <h3>Campanyes electorals</h3>
+              <p>
+                Missatge, ritme, planificació i mobilització per convertir context en
+                oportunitat i vot en majoria.
+              </p>
+            </article>
+
+            <article class="service-card">
+              <h3>Incidència i reputació</h3>
+              <p>
+                Acompanyem organitzacions i lideratges a moure agenda, construir legitimitat i
+                activar aliances sòlides.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="metode" class="section">
+        <div class="container split">
+          <div>
+            <div class="eyebrow">Mètode</div>
+            <h2 class="method-title">Acompanyament estratègic continuat.</h2>
+            <p class="lead" style="margin-top: 20px;">
+              Treballem amb presència periòdica, seguiment constant i sessions de treball amb
+              equips polítics i lideratges per garantir continuïtat, capacitat de decisió i
+              adaptació al context.
+            </p>
+          </div>
+
+          <div class="method-panel">
+            <div class="eyebrow">Com treballem</div>
+            <ul class="method-list">
+              <li>
+                <span class="method-number">1</span>
+                <div class="method-copy">
+                  <strong>Diagnosi i alineament</strong>
+                  Sessions inicials per ordenar context, objectius, hipòtesis i prioritats polítiques.
+                </div>
+              </li>
+              <li>
+                <span class="method-number">2</span>
+                <div class="method-copy">
+                  <strong>Relat i posicionament</strong>
+                  Construcció d’un marc de relat clar, diferencial i útil per a cada projecte.
+                </div>
+              </li>
+              <li>
+                <span class="method-number">3</span>
+                <div class="method-copy">
+                  <strong>Seguiment i execució</strong>
+                  Acompanyament sostingut per convertir estratègia en moviment, agenda i decisió.
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="contacte" class="section contact">
+        <div class="container contact-grid">
+          <div>
+            <div class="eyebrow" style="color: rgba(255,255,255,0.7)">Contacte</div>
+            <h2 class="contact-title">Parlem.</h2>
+            <p>
+              Si tens un projecte polític, institucional o electoral, podem ajudar-te a ordenar
+              context, afinar missatge i construir una estratègia ambiciós i executable.
+            </p>
+          </div>
+          <a class="btn btn-primary" href="mailto:info@thinkoclock.eu">info@thinkoclock.eu</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">Think O'Clock · Consultoria política</div>
+    </footer>
+  </body>
+</html>
