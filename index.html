@@ -490,6 +490,71 @@
         max-width: 44ch;
       }
 
+      /* ── CONTACT FORM ────────────────────────────────────── */
+      .contact-form {
+        width: 100%;
+        max-width: 540px;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: left;
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+      .field label {
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .field input,
+      .field textarea {
+        font-family: var(--f-body);
+        font-size: 0.9rem;
+        padding: 0.7rem 0.85rem;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 2px;
+        color: var(--text);
+        outline: none;
+        transition: border-color 0.2s;
+        resize: vertical;
+        width: 100%;
+      }
+      .field input:focus,
+      .field textarea:focus {
+        border-color: var(--brand);
+      }
+      .field input::placeholder,
+      .field textarea::placeholder {
+        color: #bbb;
+      }
+      .form-submit {
+        align-self: flex-start;
+      }
+      .form-feedback {
+        font-size: 0.85rem;
+        line-height: 1.6;
+        padding: 0.8rem 1rem;
+        border-radius: 2px;
+        display: none;
+      }
+      .form-feedback.ok  { background: rgba(31,77,77,0.08); color: var(--brand); }
+      .form-feedback.err { background: rgba(160,40,40,0.08); color: #7a1c1c; }
+
+      @media (max-width: 540px) {
+        .form-row { grid-template-columns: 1fr; }
+      }
+
       /* ── FOOTER ──────────────────────────────────────────── */
       footer {
         border-top: 1px solid var(--line);
@@ -711,8 +776,37 @@
           <span class="eyebrow" data-i18n="cta_tag">Contacte</span>
           <p class="contact-pre" data-i18n="cta_pre">Tens un projecte.</p>
           <h2 class="contact-title" data-i18n="cta_title">Parlem.</h2>
-          <p class="contact-body" data-i18n="cta_body">Si tens un projecte polític, institucional o electoral, podem ajudar-te a ordenar context, afinar missatge i construir una estratègia ambiciosa i executable.</p>
-          <a href="mailto:info@thinkoclock.eu" class="btn btn-primary" data-i18n="cta_btn">info@thinkoclock.eu</a>
+
+          <form class="contact-form" id="contact-form" novalidate>
+            <!-- Web3Forms: obté la teva clau a https://web3forms.com introduint info@thinkoclock.eu -->
+            <input type="hidden" name="access_key" value="SUBSTITUEIX_PER_LA_TEVA_CLAU">
+            <input type="hidden" name="subject"    value="Nou contacte — Think O'Clock">
+            <input type="hidden" name="from_name"  value="Think O'Clock Web">
+            <!-- honeypot anti-spam -->
+            <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
+
+            <div class="form-row">
+              <div class="field">
+                <label for="cf-name"  data-i18n="f_name_label">Nom</label>
+                <input  id="cf-name"  type="text"  name="name"    required autocomplete="name">
+              </div>
+              <div class="field">
+                <label for="cf-email" data-i18n="f_email_label">Correu electrònic</label>
+                <input  id="cf-email" type="email" name="email"   required autocomplete="email">
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="cf-msg" data-i18n="f_msg_label">Missatge</label>
+              <textarea id="cf-msg"   name="message" rows="5"     required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary form-submit" id="cf-submit">
+              <span data-i18n="f_send">Enviar missatge</span>
+            </button>
+
+            <div class="form-feedback" id="cf-feedback" role="status"></div>
+          </form>
         </div>
       </section>
 
@@ -770,8 +864,17 @@
           cta_tag:   'Contacte',
           cta_pre:   'Tens un projecte.',
           cta_title: 'Parlem.',
-          cta_body:  'Si tens un projecte polític, institucional o electoral, podem ajudar-te a ordenar context, afinar missatge i construir una estratègia ambiciosa i executable.',
-          cta_btn:   'info@thinkoclock.eu',
+
+          f_name_label:  'Nom',
+          f_name_ph:     'El teu nom',
+          f_email_label: 'Correu electrònic',
+          f_email_ph:    'el.teu@correu.cat',
+          f_msg_label:   'Missatge',
+          f_msg_ph:      'Explica\'ns el teu projecte...',
+          f_send:        'Enviar missatge',
+          f_sending:     'Enviant...',
+          f_ok:          'Missatge enviat. Ens posem en contacte aviat.',
+          f_err:         'Hi ha hagut un error. Prova de nou o escriu a info@thinkoclock.eu.',
 
           ft_desc: 'Consultoria política',
           ft_copy: '© 2025 Think O\'Clock',
@@ -815,8 +918,17 @@
           cta_tag:   'Contacto',
           cta_pre:   'Tienes un proyecto.',
           cta_title: 'Hablemos.',
-          cta_body:  'Si tienes un proyecto político, institucional o electoral, podemos ayudarte a ordenar contexto, afinar mensaje y construir una estrategia ambiciosa y ejecutable.',
-          cta_btn:   'info@thinkoclock.eu',
+
+          f_name_label:  'Nombre',
+          f_name_ph:     'Tu nombre',
+          f_email_label: 'Correo electrónico',
+          f_email_ph:    'tu@correo.es',
+          f_msg_label:   'Mensaje',
+          f_msg_ph:      'Cuéntanos tu proyecto...',
+          f_send:        'Enviar mensaje',
+          f_sending:     'Enviando...',
+          f_ok:          'Mensaje enviado. Nos ponemos en contacto pronto.',
+          f_err:         'Ha habido un error. Inténtalo de nuevo o escribe a info@thinkoclock.eu.',
 
           ft_desc: 'Consultoría política',
           ft_copy: '© 2025 Think O\'Clock',
@@ -860,8 +972,17 @@
           cta_tag:   'Contact',
           cta_pre:   'You have a project.',
           cta_title: 'Let\'s talk.',
-          cta_body:  'If you have a political, institutional or electoral project, we can help you organise context, refine your message and build an ambitious and executable strategy.',
-          cta_btn:   'info@thinkoclock.eu',
+
+          f_name_label:  'Name',
+          f_name_ph:     'Your name',
+          f_email_label: 'Email address',
+          f_email_ph:    'your@email.com',
+          f_msg_label:   'Message',
+          f_msg_ph:      'Tell us about your project...',
+          f_send:        'Send message',
+          f_sending:     'Sending...',
+          f_ok:          'Message sent. We\'ll be in touch soon.',
+          f_err:         'There was an error. Please try again or write to info@thinkoclock.eu.',
 
           ft_desc: 'Political consultancy',
           ft_copy: '© 2025 Think O\'Clock',
@@ -873,6 +994,16 @@
           var key = el.getAttribute('data-i18n');
           if (T[lang] && T[lang][key]) el.textContent = T[lang][key];
         });
+        // update placeholders
+        var fields = {
+          'cf-name':  'f_name_ph',
+          'cf-email': 'f_email_ph',
+          'cf-msg':   'f_msg_ph',
+        };
+        Object.keys(fields).forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el && T[lang][fields[id]]) el.placeholder = T[lang][fields[id]];
+        });
         document.querySelectorAll('.lang-btn').forEach(function (btn) {
           btn.classList.remove('active');
         });
@@ -880,6 +1011,58 @@
         if (activeBtn) activeBtn.classList.add('active');
         document.documentElement.lang = lang;
       }
+
+      // init placeholders on load
+      setLang('ca');
+      // restore to default active state (setLang already called above sets CA active)
+
+      // ── CONTACT FORM SUBMISSION ─────────────────────────────
+      (function () {
+        var form     = document.getElementById('contact-form');
+        var feedback = document.getElementById('cf-feedback');
+        var submitBtn = document.getElementById('cf-submit');
+        var submitLabel = submitBtn.querySelector('[data-i18n]');
+
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          var lang = document.documentElement.lang || 'ca';
+
+          // basic client-side validation
+          if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+          }
+
+          submitLabel.textContent = T[lang].f_sending;
+          submitBtn.disabled = true;
+          feedback.style.display = 'none';
+          feedback.className = 'form-feedback';
+
+          try {
+            var res = await fetch('https://api.web3forms.com/submit', {
+              method: 'POST',
+              body: new FormData(form),
+            });
+            var json = await res.json();
+
+            if (json.success) {
+              feedback.textContent = T[lang].f_ok;
+              feedback.className = 'form-feedback ok';
+              feedback.style.display = 'block';
+              form.reset();
+            } else {
+              throw new Error(json.message || 'error');
+            }
+          } catch (_) {
+            feedback.textContent = T[lang].f_err;
+            feedback.className = 'form-feedback err';
+            feedback.style.display = 'block';
+          } finally {
+            submitLabel.textContent = T[lang].f_send;
+            submitBtn.disabled = false;
+          }
+        });
+      })();
     </script>
   </body>
 </html>
