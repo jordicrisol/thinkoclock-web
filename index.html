@@ -1,1068 +1,885 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ca">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Think O'Clock — Consultoria política</title>
-    <meta name="description" content="Think O'Clock és una consultora especialitzada en estratègia política i electoral." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
-    <style>
-      /* ── TOKENS ─────────────────────────────────────────── */
-      :root {
-        --bg:          #f4f3ef;
-        --bg-alt:      #edecea;
-        --dark:        #0d1a1a;
-        --surface:     #ffffff;
-        --text:        #111111;
-        --muted:       #6b6b6b;
-        --brand:       #1f4d4d;
-        --brand-soft:  rgba(31, 77, 77, 0.07);
-        --gold:        #b8965a;
-        --line:        rgba(0, 0, 0, 0.1);
-        --f-display:   'DM Serif Display', Georgia, serif;
-        --f-body:      'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
-        --max:         1160px;
-        --h-pad:       clamp(1.25rem, 5vw, 3.5rem);
-      }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Think O'Clock — Consultoria Política</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600;1,700&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --teal: #134f5c;
+    --teal-light: #1a6b7c;
+    --teal-dark: #0d3740;
+    --amber: oklch(0.72 0.14 65);
+    --amber-hover: oklch(0.65 0.16 65);
+    --cream: #faf8f4;
+    --warm-white: #f5f3ef;
+    --ink: #111210;
+    --ink-mid: #3d3d3a;
+    --ink-light: #7a7a74;
+    --border: #e2dfd8;
+    --font-heading: 'Playfair Display', Georgia, serif;
+    --font-body: 'Source Sans 3', 'Helvetica Neue', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-body); background: var(--cream); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  
+  /* TWEAKS panel */
+  #tweaks-panel {
+    display: none;
+    position: fixed; bottom: 24px; right: 24px;
+    background: white; border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; width: 280px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    z-index: 9999; font-family: var(--font-body); font-size: 14px;
+  }
+  #tweaks-panel.visible { display: block; }
+  #tweaks-panel h3 { font-family: var(--font-heading); font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 16px; color: var(--ink); }
+  #tweaks-panel label { display: block; font-size: 12px; color: var(--ink-light); margin-bottom: 6px; margin-top: 14px; }
+  #tweaks-panel select, #tweaks-panel input[type=range] { width: 100%; }
+  #tweaks-panel select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--cream); font-family: var(--font-body); font-size: 13px; }
+  .tweak-swatches { display: flex; gap: 8px; margin-top: 6px; }
+  .tweak-swatch { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: border-color 0.2s; }
+  .tweak-swatch.active { border-color: var(--ink); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="tweaks-panel">
+  <h3>Tweaks</h3>
+  <label>Estil d'hero</label>
+  <select id="tw-hero" onchange="applyTweaks()">
+    <option value="dark">Fosc (teal)</option>
+    <option value="light">Clar (crema)</option>
+    <option value="split">Split (imatge + text)</option>
+  </select>
+  <label>Color d'accent</label>
+  <div class="tweak-swatches">
+    <div class="tweak-swatch active" style="background:oklch(0.72 0.14 65)" data-accent="amber" onclick="setAccent(this,'oklch(0.72 0.14 65)')"></div>
+    <div class="tweak-swatch" style="background:oklch(0.70 0.14 25)" data-accent="red" onclick="setAccent(this,'oklch(0.70 0.14 25)')"></div>
+    <div class="tweak-swatch" style="background:oklch(0.70 0.12 240)" data-accent="blue" onclick="setAccent(this,'oklch(0.70 0.12 240)')"></div>
+  </div>
+  <label>Densitat tipogràfica</label>
+  <select id="tw-density" onchange="applyTweaks()">
+    <option value="spacious">Espaiada</option>
+    <option value="compact">Compacta</option>
+  </select>
+</div>
 
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<script type="text/babel">
 
-      html {
-        scroll-behavior: smooth;
-        -webkit-font-smoothing: antialiased;
-      }
 
-      body {
-        font-family: var(--f-body);
-        background: var(--bg);
-        color: var(--text);
-        font-size: 1rem;
-        line-height: 1.6;
-      }
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "heroStyle": "dark",
+  "accentColor": "oklch(0.72 0.14 65)",
+  "density": "compact"
+}/*EDITMODE-END*/;
 
-      a { color: inherit; text-decoration: none; }
-      h1, h2, h3 { font-weight: 400; }
+const COPY = {
+  ca: {
+    nav: { services: "Serveis", method: "Mètode", about: "Qui som", contact: "Contacte", cta: "Parlem?" },
+    hero: {
+      label: "Consultoria Política",
+      h1a: "Entendre el context.",
+      h1b: "Construir el relat. Guanyar.",
+      sub: "Estratègia política i electoral basada en context, narrativa i execució. Acompanyem lideratges, equips i organitzacions per convertir context en decisió i campanya en resultat.",
+      cta: "Parlem?",
+      cta2: "Veure serveis"
+    },
+    context: {
+      label: "Context",
+      title: "Llegir el moment és la base de qualsevol estratègia guanyadora.",
+      body: "Treballem en entorns polítics complexos, amb governs consolidats, escenaris fragmentats i competència intensa. En aquest context, construir lideratge, relat i posició és clau per esdevenir alternativa real de govern o per exercir una incidència útil i reconeixible."
+    },
+    services: {
+      label: "Serveis",
+      title: "Estratègia, relat i execució.",
+      items: [
+      { num: "01", title: "Estratègia política", desc: "Diagnòstic, posicionament i arquitectura de relat per a moments que demanen lectura fina, decisió clara i visió de conjunt." },
+      { num: "02", title: "Campanyes electorals", desc: "Missatge, ritme, planificació i mobilització per convertir context en oportunitat i vot en majoria." },
+      { num: "03", title: "Incidència i reputació", desc: "Acompanyem organitzacions i lideratges a moure agenda, construir legitimitat i activar aliances sòlides." }]
 
-      .wrap {
-        width: min(var(--max), calc(100% - var(--h-pad) * 2));
-        margin: 0 auto;
-      }
+    },
+    method: {
+      label: "Mètode",
+      title: "Acompanyament estratègic continuat.",
+      body: "Treballem amb presència periòdica, seguiment constant i sessions de treball amb equips polítics i lideratges per garantir continuïtat, capacitat de decisió i adaptació al context.",
+      steps: [
+      { num: "01", title: "Diagnosi i alineament", desc: "Sessions inicials per ordenar context, objectius, hipòtesis i prioritats polítiques de forma clara i accionable." },
+      { num: "02", title: "Relat i posicionament", desc: "Construcció d'un marc de relat clar, diferencial i útil per a cada projecte polític i moment electoral." },
+      { num: "03", title: "Seguiment i execució", desc: "Acompanyament sostingut per convertir estratègia en moviment, agenda i decisió real sobre el terreny." }]
 
-      /* ── EYEBROW ─────────────────────────────────────────── */
-      .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.6rem;
-        font-size: 0.72rem;
-        font-weight: 500;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--brand);
-      }
-      .eyebrow::before {
-        content: '';
-        display: block;
-        width: 1.4rem;
-        height: 1px;
-        background: currentColor;
-        flex-shrink: 0;
-      }
+    },
+    about: {
+      label: "Qui som",
+      title: "Experiència que\nfa la diferència.",
+      bio: "Think O'Clock és una consultora especialitzada en estratègia i comunicació política amb una sòlida trajectòria en el disseny i execució de campanyes electorals a escala municipal, autonòmica, estatal i internacional. L'equip combina anàlisi política, construcció de relat i planificació estratègica per ajudar partits i candidatures a definir posicionaments clars i competitius.",
+      bio2: "Amb experiència a Catalunya, l'Estat espanyol i diversos països d'Amèrica Llatina, treballa per articular projectes polítics creïbles, cohesionats i orientats a la victòria, adaptant-se a contextos complexos i dinàmics.",
+      stats: [
+      { n: "+70", label: "campanyes electorals" },
+      { n: "+10", label: "anys d'experiència" },
+      { n: "5", label: "països" }],
+      team: [
+        { name: 'Jordi Crisol', role: 'Consultor Polític', img: 'jordi.png', pos: 'center 8%', desc: 'Politòleg i especialista en comunicació política i institucional, amb més de 10 anys d\'experiència entre administració pública i sector privat. Assessora governs i partits en estratègia, relat i campanyes, amb focus en incidència, opinió pública i reputació a Catalunya i Espanya.' },
+        { name: 'Marc Cases', role: 'Consultor Polític', img: 'marc.png', pos: 'center 5%', desc: 'Especialista en estratègia i comunicació, amb trajectòria consolidada en l\'àmbit institucional i corporatiu. Assessora governs, empreses i organitzacions en posicionament, relat i incidència pública, amb experiència en gestió de contextos complexos i construcció d\'influència.' },
+      ]
+    },
+    blog: {
+      label: "Blog",
+      title: "Reflexions sobre política",
+      posts: [
+      { cat: "Estratègia", title: "Com construir un relat de ciutat que connecti de debò", date: "Abril 2026" },
+      { cat: "Comunicació", title: "La narrativa del candidat: entre la credibilitat i la proximitat", date: "Març 2026" },
+      { cat: "Campanya", title: "10 errors que eviten que una campanya municipal guanyi", date: "Febrer 2026" }]
 
-      /* ── HEADER ──────────────────────────────────────────── */
-      .site-header {
-        position: sticky;
-        top: 0;
-        z-index: 50;
-        height: 68px;
-        background: rgba(244, 243, 239, 0.88);
-        backdrop-filter: blur(12px);
-        border-bottom: 1px solid var(--line);
+    },
+    contact: {
+      label: "Contacte",
+      title: "Tens un projecte? Parlem.",
+      sub: "Si tens un projecte polític, institucional o electoral, podem ajudar-te a ordenar context, afinar missatge i construir una estratègia ambiciosa i executable.",
+      name: "Nom i organització", email: "Correu electrònic", msg: "Projecte...",
+      send: "Enviar missatge",
+      info: ["Passatge Permanyer 2, 08009 Barcelona", "info@thinkoclock.eu", "thinkoclock.eu"]
+    },
+    footer: { tagline: "Consultoria Política", rights: "© 2026 Think O'Clock SL. Tots els drets reservats.", legal: "Avís legal",
+      legalContent: {
+        titular: "Titular", nif: "NIF", conditions: "Condicions d'ús", conditionsText: "L'accés i ús d'aquest lloc web implica l'acceptació de les presents condicions. Think O'Clock SL es reserva el dret a modificar els continguts del lloc web sense previ avís.",
+        ip: "Propietat intel\u00b7lectual", ipText: "Tots els continguts d'aquest lloc web (textos, imatges, disseny) són propietat de Think O'Clock SL o de tercers que n'han autoritzat l'ús. Queda prohibida la seva reproducció total o parcial sense autorització expressa.",
+        gdpr: "Protecció de dades", gdprText: "Les dades personals facilitades a través del formulari de contacte seran tractades per Think O'Clock SL amb la finalitat de gestionar la seva consulta, en compliment del Reglament (UE) 2016/679 (RGPD) i la Llei Orgànica 3/2018 (LOPDGDD). No es cediran a tercers sense consentiment. Podeu exercir els vostres drets d'accés, rectificació, supressió i portabilitat adreçant-vos a info@thinkoclock.eu.",
+        law: "Llei aplicable", lawText: "Aquest avís legal es regeix per la legislació espanyola. Per a qualsevol controvèrsia derivada de l'ús d'aquest lloc web, les parts se sotmeten als jutjats i tribunals de Barcelona."
       }
-      .site-header .wrap {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-      }
+    }
+  },
+  es: {
+    nav: { services: "Servicios", method: "Método", about: "Quiénes somos", contact: "Contacto", cta: "¿Hablemos?" },
+    hero: {
+      label: "Consultoría Política",
+      h1a: "Entender el contexto.",
+      h1b: "Construir el relato. Ganar.",
+      sub: "Estrategia política y electoral basada en contexto, narrativa y ejecución. Acompañamos liderazgos, equipos y organizaciones para convertir contexto en decisión y campaña en resultado.",
+      cta: "¿Hablemos?",
+      cta2: "Ver servicios"
+    },
+    context: {
+      label: "Contexto",
+      title: "Leer el momento es la base de cualquier estrategia ganadora.",
+      body: "Trabajamos en entornos políticos complejos, con gobiernos consolidados, escenarios fragmentados y competencia intensa. En este contexto, construir liderazgo, relato y posición es clave para convertirse en alternativa real de gobierno o para ejercer una incidencia útil y reconocible."
+    },
+    services: {
+      label: "Servicios",
+      title: "Estrategia, relato y ejecución.",
+      items: [
+      { num: "01", title: "Estrategia política", desc: "Diagnóstico, posicionamiento y arquitectura de relato para momentos que exigen lectura fina, decisión clara y visión de conjunto." },
+      { num: "02", title: "Campañas electorales", desc: "Mensaje, ritmo, planificación y movilización para convertir contexto en oportunidad y voto en mayoría." },
+      { num: "03", title: "Incidencia y reputación", desc: "Acompañamos a organizaciones y liderazgos a mover agenda, construir legitimidad y activar alianzas sólidas." }]
 
-      .brand {
-        font-family: var(--f-body);
-        font-size: 0.85rem;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: var(--brand);
-        white-space: nowrap;
-      }
+    },
+    method: {
+      label: "Método",
+      title: "Acompañamiento estratégico continuo.",
+      body: "Trabajamos con presencia periódica, seguimiento constante y sesiones de trabajo con equipos políticos y liderazgos para garantizar continuidad, capacidad de decisión y adaptación al contexto.",
+      steps: [
+      { num: "01", title: "Diagnóstico y alineamiento", desc: "Sesiones iniciales para ordenar contexto, objetivos, hipótesis y prioridades políticas de forma clara y accionable." },
+      { num: "02", title: "Relato y posicionamiento", desc: "Construcción de un marco de relato claro, diferencial y útil para cada proyecto político y momento electoral." },
+      { num: "03", title: "Seguimiento y ejecución", desc: "Acompañamiento sostenido para convertir estrategia en movimiento, agenda y decisión real sobre el terreno." }]
 
-      .site-nav {
-        display: flex;
-        gap: 2rem;
-        align-items: center;
-      }
-      .site-nav a {
-        font-size: 0.83rem;
-        color: var(--muted);
-        letter-spacing: 0.02em;
-        position: relative;
-        padding-bottom: 2px;
-        transition: color 0.2s;
-      }
-      .site-nav a::after {
-        content: '';
-        position: absolute;
-        bottom: 0; left: 0;
-        width: 0; height: 1px;
-        background: var(--brand);
-        transition: width 0.25s;
-      }
-      .site-nav a:hover { color: var(--text); }
-      .site-nav a:hover::after { width: 100%; }
+    },
+    about: {
+      label: "Quiénes somos",
+      title: "Experiencia que\nhace la diferencia.",
+      bio: "Think O'Clock es una consultora especializada en estrategia y comunicación política con una sólida trayectoria en el diseño y ejecución de campañas electorales a escala municipal, autonómica, estatal e internacional. El equipo combina análisis político, construcción de relato y planificación estratégica para ayudar a partidos y candidaturas a definir posicionamientos claros y competitivos.",
+      bio2: "Con experiencia en Cataluña, España y varios países de América Latina, trabaja para articular proyectos políticos creíbles, cohesionados y orientados a la victoria, adaptándose a contextos complejos y dinámicos.",
+      stats: [
+      { n: "+70", label: "campañas electorales" },
+      { n: "+10", label: "años de experiencia" },
+      { n: "5", label: "países" }],
+      team: [
+        { name: 'Jordi Crisol', role: 'Consultor Político', img: 'jordi.png', pos: 'center 8%', desc: 'Politólogo y especialista en comunicación política e institucional, con más de 10 años de experiencia entre administración pública y sector privado. Asesora a gobiernos y partidos en estrategia, relato y campañas, con foco en incidencia, opinión pública y reputación en Cataluña y España.' },
+        { name: 'Marc Cases', role: 'Consultor Político', img: 'marc.png', pos: 'center 5%', desc: 'Especialista en estrategia y comunicación, con trayectoria consolidada en el ámbito institucional y corporativo. Asesora a gobiernos, empresas y organizaciones en posicionamiento, relato e incidencia pública, con experiencia en gestión de contextos complejos y construcción de influencia.' },
+      ]
 
-      /* ── LANG SWITCHER ───────────────────────────────────── */
-      .lang-switch {
-        display: flex;
-        gap: 2px;
-        align-items: center;
-      }
-      .lang-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-family: var(--f-body);
-        font-size: 0.72rem;
-        font-weight: 500;
-        letter-spacing: 0.08em;
-        color: var(--muted);
-        padding: 0.3rem 0.45rem;
-        border-radius: 3px;
-        transition: color 0.15s, background 0.15s;
-      }
-      .lang-btn:hover { color: var(--text); }
-      .lang-btn.active {
-        color: var(--brand);
-        background: var(--brand-soft);
-      }
+    },
+    blog: {
+      label: "Blog",
+      title: "Reflexiones sobre política",
+      posts: [
+      { cat: "Estrategia", title: "Cómo construir un relato de ciudad que conecte de verdad", date: "Abril 2026" },
+      { cat: "Comunicación", title: "La narrativa del candidato: entre la credibilidad y la cercanía", date: "Marzo 2026" },
+      { cat: "Campaña", title: "10 errores que impiden que una campaña municipal gane", date: "Febrero 2026" }]
 
-      /* ── HERO ────────────────────────────────────────────── */
-      .hero {
-        min-height: calc(100vh - 68px);
-        border-bottom: 1px solid var(--line);
-        overflow: hidden;
+    },
+    contact: {
+      label: "Contacto",
+      title: "Tienes un proyecto. Hablemos.",
+      sub: "Si tienes un proyecto político, institucional o electoral, podemos ayudarte a ordenar contexto, afinar mensaje y construir una estrategia ambiciosa y ejecutable.",
+      name: "Nombre y organización", email: "Correo electrónico", msg: "Proyecto...",
+      send: "Enviar mensaje",
+      info: ["Passatge Permanyer 2, 08009 Barcelona", "info@thinkoclock.eu", "thinkoclock.eu"]
+    },
+    footer: { tagline: "Consultoría Política", rights: "© 2026 Think O'Clock SL. Todos los derechos reservados.", legal: "Aviso legal",
+      legalContent: {
+        titular: "Titular", nif: "NIF", conditions: "Condiciones de uso", conditionsText: "El acceso y uso de este sitio web implica la aceptación de las presentes condiciones. Think O'Clock SL se reserva el derecho a modificar los contenidos del sitio web sin previo aviso.",
+        ip: "Propiedad intelectual", ipText: "Todos los contenidos de este sitio web (textos, imágenes, diseño) son propiedad de Think O'Clock SL o de terceros que han autorizado su uso. Queda prohibida su reproducción total o parcial sin autorización expresa.",
+        gdpr: "Protección de datos", gdprText: "Los datos personales facilitados a través del formulario de contacto serán tratados por Think O'Clock SL con el fin de gestionar su consulta, en cumplimiento del Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD). No se cederán a terceros sin consentimiento. Puede ejercer sus derechos de acceso, rectificación, supresión y portabilidad dirigiéndose a info@thinkoclock.eu.",
+        law: "Ley aplicable", lawText: "Este aviso legal se rige por la legislación española. Para cualquier controversia derivada del uso de este sitio web, las partes se someten a los juzgados y tribunales de Barcelona."
       }
-      .hero .wrap {
-        display: grid;
-        grid-template-columns: 58fr 42fr;
-        gap: 3rem;
-        align-items: center;
-        padding-top: 6rem;
-        padding-bottom: 6rem;
-        min-height: calc(100vh - 68px);
-      }
+    }
+  },
+  en: {
+    nav: { services: "Services", method: "Method", about: "About", contact: "Contact", cta: "Let's talk?" },
+    hero: {
+      label: "Political Consultancy",
+      h1a: "Understand the context.",
+      h1b: "Build the narrative. Win.",
+      sub: "Political and electoral strategy based on context, narrative and execution. We support leaders, teams and organisations to turn context into decisions and campaigns into results.",
+      cta: "Let's talk?",
+      cta2: "Our services"
+    },
+    context: {
+      label: "Context",
+      title: "Reading the moment is the foundation of any winning strategy.",
+      body: "We work in complex political environments, with consolidated governments, fragmented scenarios and intense competition. In this context, building leadership, narrative and position is key to becoming a real governing alternative or exercising useful, recognisable political influence."
+    },
+    services: {
+      label: "Services",
+      title: "Strategy, narrative and execution.",
+      items: [
+      { num: "01", title: "Political strategy", desc: "Diagnosis, positioning and narrative architecture for moments that demand sharp reading, clear decisions and an overview." },
+      { num: "02", title: "Electoral campaigns", desc: "Message, rhythm, planning and mobilisation to turn context into opportunity and votes into a majority." },
+      { num: "03", title: "Advocacy & reputation", desc: "We support organisations and leaders to move agendas, build legitimacy and activate solid alliances." }]
 
-      .hero-content {
-        display: flex;
-        flex-direction: column;
-        gap: 1.75rem;
-        animation: rise 0.65s ease-out both;
-      }
+    },
+    method: {
+      label: "Method",
+      title: "Ongoing strategic accompaniment.",
+      body: "We work with periodic presence, constant follow-up and working sessions with political teams and leaders to ensure continuity, decision-making capacity and adaptation to context.",
+      steps: [
+      { num: "01", title: "Diagnosis & alignment", desc: "Initial sessions to map context, objectives, hypotheses and political priorities in a clear and actionable way." },
+      { num: "02", title: "Narrative & positioning", desc: "Building a clear, distinctive and useful narrative framework for each political project and electoral moment." },
+      { num: "03", title: "Follow-up & execution", desc: "Sustained accompaniment to turn strategy into movement, agenda and real decisions on the ground." }]
 
-      h1 {
-        font-family: var(--f-display);
-        font-size: clamp(2.6rem, 5.5vw, 4.75rem);
-        line-height: 1.05;
-        letter-spacing: -0.025em;
-        max-width: 14ch;
-      }
-      h1 em { font-style: italic; }
+    },
+    about: {
+      label: "About",
+      title: "Experience that\nmakes the difference.",
+      bio: "Think O'Clock is a consultancy specialising in political strategy and communication with a solid track record in designing and executing electoral campaigns at municipal, regional, national and international level. The team combines political analysis, narrative building and strategic planning to help parties and candidates define clear, competitive positions.",
+      bio2: "With experience in Catalonia, Spain and several Latin American countries, we work to build credible, cohesive political projects oriented towards winning, adapting to complex and dynamic contexts.",
+      stats: [
+      { n: "+70", label: "electoral campaigns" },
+      { n: "+10", label: "years of experience" },
+      { n: "5", label: "countries" }],
+      team: [
+        { name: 'Jordi Crisol', role: 'Political Consultant', img: 'jordi.png', pos: 'center 8%', desc: 'Political scientist and specialist in political and institutional communication, with over 10 years of experience across public administration and the private sector. He advises governments and parties on strategy, narrative and campaigns, with a focus on advocacy, public opinion and reputation in Catalonia and Spain.' },
+        { name: 'Marc Cases', role: 'Political Consultant', img: 'marc.png', pos: 'center 5%', desc: 'Specialist in strategy and communication, with a consolidated track record in the institutional and corporate sphere. He advises governments, businesses and organisations on positioning, narrative and public advocacy, with experience managing complex contexts and building influence.' },
+      ]
 
-      .hero-lead {
-        font-size: 1rem;
-        line-height: 1.8;
-        color: var(--muted);
-        max-width: 46ch;
-      }
+    },
+    blog: {
+      label: "Blog",
+      title: "Reflections on politics",
+      posts: [
+      { cat: "Strategy", title: "How to build a city narrative that truly connects", date: "April 2026" },
+      { cat: "Communication", title: "The candidate's narrative: between credibility and closeness", date: "March 2026" },
+      { cat: "Campaign", title: "10 mistakes that prevent a municipal campaign from winning", date: "February 2026" }]
 
-      .hero-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        padding-top: 0.25rem;
+    },
+    contact: {
+      label: "Contact",
+      title: "You have a project. Let's talk.",
+      sub: "If you have a political, institutional or electoral project, we can help you map the context, sharpen the message and build an ambitious, executable strategy.",
+      name: "Name and organisation", email: "Email address", msg: "Project...",
+      send: "Send message",
+      info: ["Passatge Permanyer 2, 08009 Barcelona", "info@thinkoclock.eu", "thinkoclock.eu"]
+    },
+    footer: { tagline: "Political Consultancy", rights: "© 2026 Think O'Clock SL. All rights reserved.", legal: "Legal notice",
+      legalContent: {
+        titular: "Company details", nif: "VAT number", conditions: "Terms of use", conditionsText: "Access to and use of this website implies acceptance of these terms. Think O'Clock SL reserves the right to modify the website content without prior notice.",
+        ip: "Intellectual property", ipText: "All contents of this website (texts, images, design) are the property of Think O'Clock SL or third parties who have authorised their use. Total or partial reproduction without express authorisation is prohibited.",
+        gdpr: "Data protection", gdprText: "Personal data provided through the contact form will be processed by Think O'Clock SL for the purpose of managing your enquiry, in compliance with Regulation (EU) 2016/679 (GDPR) and Organic Law 3/2018. Data will not be shared with third parties without consent. You may exercise your rights of access, rectification, erasure and portability by writing to info@thinkoclock.eu.",
+        law: "Applicable law", lawText: "This legal notice is governed by Spanish legislation. For any dispute arising from the use of this website, the parties submit to the courts and tribunals of Barcelona."
       }
+    }
+  }
+};
 
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--f-body);
-        font-size: 0.83rem;
-        font-weight: 500;
-        letter-spacing: 0.02em;
-        padding: 0.72rem 1.6rem;
-        border-radius: 2px;
-        transition: transform 0.15s, background 0.2s, border-color 0.2s, color 0.2s;
-      }
-      .btn:hover { transform: translateY(-1px); }
+const { useState, useEffect, useRef } = React;
 
-      .btn-primary {
-        background: var(--brand);
-        color: white;
-      }
-      .btn-primary:hover { background: #163838; }
+// ── LOGO ──────────────────────────────────────────────────────────────
+function Logo({ white }) {
+  const textColor = white ? '#ffffff' : '#0c3540';
+  const accentColor = white ? 'rgba(255,255,255,0.75)' : '#c9a84c';
+  const lineColor = white ? 'rgba(255,255,255,0.4)' : '#c9a84c';
+  return (
+    <svg width="260" height="62" viewBox="0 0 600 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Think O'Clock">
+      <text x="80" y="108" fontFamily="'Space Grotesk', Arial, sans-serif" fontWeight="700" fontSize="54" fill={textColor} letterSpacing="-1.5">THINK</text>
+      <line x1="268" y1="44" x2="268" y2="116" stroke={lineColor} strokeWidth="2"/>
+      <text x="278" y="108" fontFamily="'Space Grotesk', Arial, sans-serif" fontWeight="300" fontSize="54" fill={accentColor} letterSpacing="-1.5">O'CLOCK</text>
+    </svg>
+  );
 
-      .btn-ghost {
-        background: transparent;
-        color: var(--text);
-        border: 1px solid var(--line);
-      }
-      .btn-ghost:hover { border-color: var(--brand); color: var(--brand); }
 
-      /* ── CLOCK ART (hero visual) ─────────────────────────── */
-      .hero-visual {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: rise 0.65s ease-out 0.18s both;
-      }
+}
 
-      .clock-wrap {
-        position: relative;
-        width: min(380px, 90%);
-        aspect-ratio: 1;
-      }
+// ── NAV ──────────────────────────────────────────────────────────────
+function Nav({ lang, setLang, t, heroStyle }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isDark = heroStyle === 'dark' && !scrolled;
 
-      .c-ring {
-        position: absolute;
-        border-radius: 50%;
-        border: 1px solid var(--brand);
-      }
-      .c-ring-1 { inset: 0;   opacity: 0.1; }
-      .c-ring-2 { inset: 11%; opacity: 0.2; }
-      .c-ring-3 { inset: 24%; opacity: 0.35; border-color: var(--gold); }
-      .c-ring-4 { inset: 39%; opacity: 0.5; }
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', fn);
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
 
-      .c-mark {
-        position: absolute;
-        width: 5px; height: 5px;
-        background: var(--brand);
-        border-radius: 50%;
-        opacity: 0.4;
-      }
-      .c-mark-n  { top: 4.5%; left: calc(50% - 2.5px); }
-      .c-mark-e  { right: 4.5%; top: calc(50% - 2.5px); }
-      .c-mark-s  { bottom: 4.5%; left: calc(50% - 2.5px); }
-      .c-mark-w  { left: 4.5%; top: calc(50% - 2.5px); }
+  const navStyle = {
+    position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    padding: '0 5vw',
+    height: 72,
+    background: scrolled ? 'rgba(250,248,244,0.96)' : 'transparent',
+    backdropFilter: scrolled ? 'blur(12px)' : 'none',
+    borderBottom: scrolled ? '1px solid #e2dfd8' : 'none',
+    transition: 'all 0.3s ease'
+  };
 
-      .c-center {
-        position: absolute;
-        inset: calc(50% - 4px);
-        background: var(--brand);
-        border-radius: 50%;
-        z-index: 2;
-      }
+  const linkColor = isDark ? 'rgba(255,255,255,0.8)' : 'var(--ink-mid)';
+  const linkStyle = { color: linkColor, textDecoration: 'none', fontSize: 14, fontWeight: 500, letterSpacing: '0.02em', transition: 'color 0.2s' };
 
-      .c-hand {
-        position: absolute;
-        top: 50%; left: 50%;
-        height: 1.5px;
-        background: var(--brand);
-        transform-origin: left center;
-        border-radius: 1px;
-      }
-      .c-hand-long  {
-        width: 31%;
-        transform: translate(0, -50%) rotate(-52deg);
-        opacity: 0.6;
-      }
-      .c-hand-short {
-        width: 20%;
-        transform: translate(0, -50%) rotate(38deg);
-        opacity: 0.45;
-      }
-
-      /* gold tick marks at 30-degree intervals */
-      .c-tick {
-        position: absolute;
-        width: 1px;
-        height: 7%;
-        background: var(--gold);
-        opacity: 0.25;
-        top: 0; left: calc(50% - 0.5px);
-        transform-origin: 50% 540%;
-      }
-
-      /* ── SECTIONS COMMON ─────────────────────────────────── */
-      .section { padding: 6rem 0; }
-
-      h2 {
-        font-family: var(--f-display);
-        font-size: clamp(1.9rem, 3.8vw, 3rem);
-        line-height: 1.12;
-        letter-spacing: -0.025em;
-      }
-
-      /* ── CONTEXT ─────────────────────────────────────────── */
-      #context { border-top: 1px solid var(--line); }
-
-      .context-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 5rem;
-        align-items: start;
-      }
-
-      .context-title {
-        font-family: var(--f-display);
-        font-size: clamp(1.8rem, 3.5vw, 2.75rem);
-        line-height: 1.14;
-        letter-spacing: -0.025em;
-        margin-top: 1.1rem;
-      }
-
-      .context-body {
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-        padding-top: 0.25rem;
-      }
-      .context-body p {
-        font-size: 1rem;
-        line-height: 1.85;
-        color: var(--muted);
-      }
-
-      /* ── SERVICES ────────────────────────────────────────── */
-      #serveis {
-        background: var(--bg-alt);
-        border-top: 1px solid var(--line);
-        border-bottom: 1px solid var(--line);
-      }
-
-      .services-head {
-        margin-bottom: 3rem;
-      }
-      .services-head h2 { margin-top: 0.9rem; }
-
-      .services-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .service-card {
-        padding: 2.25rem 1.75rem 2.5rem;
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-right: none;
-        display: flex;
-        flex-direction: column;
-        gap: 0.85rem;
-        position: relative;
-        overflow: hidden;
-        transition: background 0.2s;
-      }
-      .service-card:last-child { border-right: 1px solid var(--line); }
-      .service-card::after {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: 2px;
-        background: var(--brand);
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.3s;
-      }
-      .service-card:hover { background: var(--brand-soft); }
-      .service-card:hover::after { transform: scaleX(1); }
-
-      .service-num {
-        font-family: var(--f-display);
-        font-style: italic;
-        font-size: 1rem;
-        color: var(--gold);
-      }
-      .service-card h3 {
-        font-family: var(--f-display);
-        font-size: 1.25rem;
-        line-height: 1.25;
-      }
-      .service-card p {
-        font-size: 0.9rem;
-        line-height: 1.8;
-        color: var(--muted);
-      }
-
-      /* ── METHOD ──────────────────────────────────────────── */
-      #metode {
-        background: var(--dark);
-      }
-
-      #metode .eyebrow {
-        color: rgba(255, 255, 255, 0.35);
-      }
-      #metode .eyebrow::before { background: rgba(255, 255, 255, 0.35); }
-
-      .method-header {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 4rem;
-        align-items: end;
-        margin-bottom: 4rem;
-        padding-bottom: 3rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      }
-      .method-header h2 {
-        color: white;
-        margin-top: 1rem;
-      }
-      .method-lead {
-        font-size: 0.975rem;
-        line-height: 1.85;
-        color: rgba(255, 255, 255, 0.45);
-      }
-
-      .method-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 2.5rem;
-      }
-
-      .method-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.9rem;
-        padding-top: 1.75rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .method-num {
-        font-family: var(--f-display);
-        font-style: italic;
-        font-size: 3rem;
-        line-height: 1;
-        color: var(--gold);
-        opacity: 0.6;
-      }
-      .method-item h3 {
-        font-family: var(--f-display);
-        font-size: 1.15rem;
-        line-height: 1.3;
-        color: white;
-      }
-      .method-item p {
-        font-size: 0.88rem;
-        line-height: 1.85;
-        color: rgba(255, 255, 255, 0.42);
-      }
-
-      /* ── CONTACT ─────────────────────────────────────────── */
-      #contacte {
-        border-top: 1px solid var(--line);
-        text-align: center;
-      }
-      .contact-inner {
-        max-width: 680px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1.5rem;
-      }
-      .contact-pre {
-        font-size: 1.1rem;
-        color: var(--muted);
-        font-weight: 300;
-      }
-      .contact-title {
-        font-family: var(--f-display);
-        font-style: italic;
-        font-size: clamp(3.5rem, 9vw, 7rem);
-        line-height: 0.95;
-        letter-spacing: -0.03em;
-        color: var(--brand);
-      }
-      .contact-body {
-        font-size: 0.95rem;
-        line-height: 1.8;
-        color: var(--muted);
-        max-width: 44ch;
-      }
-
-      /* ── CONTACT FORM ────────────────────────────────────── */
-      .contact-form {
-        width: 100%;
-        max-width: 540px;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        text-align: left;
-      }
-      .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-      }
-      .field {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-      }
-      .field label {
-        font-size: 0.72rem;
-        font-weight: 500;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--muted);
-      }
-      .field input,
-      .field textarea {
-        font-family: var(--f-body);
-        font-size: 0.9rem;
-        padding: 0.7rem 0.85rem;
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 2px;
-        color: var(--text);
-        outline: none;
-        transition: border-color 0.2s;
-        resize: vertical;
-        width: 100%;
-      }
-      .field input:focus,
-      .field textarea:focus {
-        border-color: var(--brand);
-      }
-      .field input::placeholder,
-      .field textarea::placeholder {
-        color: #bbb;
-      }
-      .form-submit {
-        align-self: flex-start;
-      }
-      .form-feedback {
-        font-size: 0.85rem;
-        line-height: 1.6;
-        padding: 0.8rem 1rem;
-        border-radius: 2px;
-        display: none;
-      }
-      .form-feedback.ok  { background: rgba(31,77,77,0.08); color: var(--brand); }
-      .form-feedback.err { background: rgba(160,40,40,0.08); color: #7a1c1c; }
-
-      @media (max-width: 540px) {
-        .form-row { grid-template-columns: 1fr; }
-      }
-
-      /* ── FOOTER ──────────────────────────────────────────── */
-      footer {
-        border-top: 1px solid var(--line);
-        padding: 1.75rem 0;
-      }
-      footer .wrap {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-      }
-      .footer-left {
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-      }
-      .footer-brand {
-        font-size: 0.8rem;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        color: var(--brand);
-      }
-      .footer-desc {
-        font-size: 0.78rem;
-        color: var(--muted);
-      }
-      .footer-copy {
-        font-size: 0.78rem;
-        color: var(--muted);
-      }
-
-      /* ── ANIMATIONS ──────────────────────────────────────── */
-      @keyframes rise {
-        from { opacity: 0; transform: translateY(18px); }
-        to   { opacity: 1; transform: none; }
-      }
-
-      /* ── RESPONSIVE ──────────────────────────────────────── */
-      @media (max-width: 880px) {
-        .hero .wrap {
-          grid-template-columns: 1fr;
-          min-height: auto;
-          padding-top: 4rem;
-          padding-bottom: 4rem;
-        }
-        .hero-visual { display: none; }
-
-        .context-grid   { grid-template-columns: 1fr; gap: 2rem; }
-        .method-header  { grid-template-columns: 1fr; gap: 1.5rem; }
-        .method-grid    { grid-template-columns: 1fr; }
-        .services-grid  { grid-template-columns: 1fr; }
-        .service-card   { border-right: 1px solid var(--line); border-bottom: none; }
-        .service-card:last-child { border-bottom: 1px solid var(--line); }
-      }
-
-      @media (max-width: 640px) {
-        .site-nav { display: none; }
-
-        .section { padding: 4.5rem 0; }
-
-        footer .wrap { flex-direction: column; text-align: center; gap: 0.75rem; }
-      }
-    </style>
-  </head>
-
-  <body>
-    <!-- ── HEADER ─────────────────────────────────────────── -->
-    <header class="site-header">
-      <div class="wrap">
-        <a class="brand" href="#top">Think O'Clock</a>
-
-        <nav class="site-nav">
-          <a href="#context"  data-i18n="nav_context">Context</a>
-          <a href="#serveis"  data-i18n="nav_services">Serveis</a>
-          <a href="#metode"   data-i18n="nav_method">Mètode</a>
-          <a href="#contacte" data-i18n="nav_contact">Contacte</a>
-        </nav>
-
-        <div class="lang-switch" role="group" aria-label="Canvi d'idioma">
-          <button class="lang-btn active" id="btn-ca" onclick="setLang('ca')">CA</button>
-          <button class="lang-btn"        id="btn-es" onclick="setLang('es')">ES</button>
-          <button class="lang-btn"        id="btn-en" onclick="setLang('en')">EN</button>
+  return (
+    <nav style={navStyle}>
+      <a href="#top" style={{ textDecoration: 'none' }}>
+        <Logo white={isDark} />
+      </a>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 36 }}>
+        <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
+          {['services', 'method', 'about', 'contact'].map((k) =>
+          <a key={k} href={`#${k}`} style={linkStyle}
+          onMouseEnter={(e) => e.target.style.color = isDark ? 'white' : 'var(--teal)'}
+          onMouseLeave={(e) => e.target.style.color = linkColor}>
+              {t.nav[k]}
+            </a>
+          )}
+        </div>
+        {/* Language switcher */}
+        <div style={{ display: 'flex', gap: 4, background: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(19,79,92,0.07)', borderRadius: 20, padding: '3px 5px' }}>
+          {['ca', 'es', 'en'].map((l) =>
+          <button key={l} onClick={() => setLang(l)} style={{
+            border: 'none', background: lang === l ? isDark ? 'white' : 'var(--teal)' : 'transparent',
+            color: lang === l ? isDark ? 'var(--teal)' : 'white' : linkColor,
+            borderRadius: 16, padding: '4px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            fontFamily: 'var(--font-body)', textTransform: 'uppercase', letterSpacing: '0.06em',
+            transition: 'all 0.2s'
+          }}>
+              {l}
+            </button>
+          )}
         </div>
       </div>
-    </header>
+    </nav>);
 
-    <main id="top">
+}
 
-      <!-- ── HERO ───────────────────────────────────────────── -->
-      <section class="hero">
-        <div class="wrap">
+// ── HERO ──────────────────────────────────────────────────────────────
+function Hero({ t, heroStyle }) {
+  const isDark = heroStyle === 'dark';
+  const isSplit = heroStyle === 'split';
 
-          <div class="hero-content">
-            <span class="eyebrow" data-i18n="hero_tag">Consultoria política</span>
-            <h1 data-i18n="hero_h1">Estratègia política per guanyar context, relat i eleccions.</h1>
-            <p class="hero-lead" data-i18n="hero_lead">Think O'Clock és una consultora especialitzada en estratègia política i electoral. Acompanyem lideratges, equips i organitzacions per convertir context en decisió, relat en posició i campanya en resultat.</p>
-            <div class="hero-actions">
-              <a href="#contacte" class="btn btn-primary" data-i18n="hero_cta1">Parlem</a>
-              <a href="#serveis"  class="btn btn-ghost"   data-i18n="hero_cta2">Veure serveis</a>
-            </div>
-          </div>
+  const heroBase = {
+    minHeight: '100vh', display: 'flex', alignItems: 'center',
+    padding: '120px 5vw 80px',
+    position: 'relative', overflow: 'hidden'
+  };
 
-          <!-- CSS clock art — brand visual linked to "O'Clock" -->
-          <div class="hero-visual" aria-hidden="true">
-            <div class="clock-wrap">
-              <div class="c-ring c-ring-1"></div>
-              <div class="c-ring c-ring-2"></div>
-              <div class="c-ring c-ring-3"></div>
-              <div class="c-ring c-ring-4"></div>
-
-              <!-- hour marks every 30° -->
-              <div class="c-tick" style="transform: rotate(0deg)   translateY(-0%)"></div>
-              <div class="c-tick" style="transform: rotate(30deg)  translateY(-0%)"></div>
-              <div class="c-tick" style="transform: rotate(60deg)  translateY(-0%)"></div>
-              <div class="c-tick" style="transform: rotate(90deg)  translateY(-0%)"></div>
-              <div class="c-tick" style="transform: rotate(120deg) translateY(-0%)"></div>
-              <div class="c-tick" style="transform: rotate(150deg) translateY(-0%)"></div>
-              <div class="c-tick" style="transform: rotate(180deg) translateY(-0%)"></div>
-              <div class="c-tick" style="transform: rotate(210deg) translateY(-0%)"></div>
-              <div class="c-tick" style="transform: rotate(240deg) translateY(-0%)"></div>
-              <div class="c-tick" style="transform: rotate(270deg) translateY(-0%)"></div>
-              <div class="c-tick" style="transform: rotate(300deg) translateY(-0%)"></div>
-              <div class="c-tick" style="transform: rotate(330deg) translateY(-0%)"></div>
-
-              <div class="c-mark c-mark-n"></div>
-              <div class="c-mark c-mark-e"></div>
-              <div class="c-mark c-mark-s"></div>
-              <div class="c-mark c-mark-w"></div>
-
-              <div class="c-hand c-hand-long"></div>
-              <div class="c-hand c-hand-short"></div>
-              <div class="c-center"></div>
-            </div>
-          </div>
-
+  if (isDark) {
+    return (
+      <section id="top" style={{ ...heroBase, background: 'var(--teal-dark)' }}>
+        {/* Banner SVG background */}
+        <div style={{position:'absolute',inset:0,overflow:'hidden',pointerEvents:'none'}}>
+          <svg width="100%" height="100%" viewBox="0 0 1440 520" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="bg1" x1="0" y1="0" x2="1440" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#0c3540"/><stop offset="100%" stopColor="#134f5c"/></linearGradient>
+              <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#1a6b7d"/><stop offset="100%" stopColor="#0c3540"/></linearGradient>
+              <linearGradient id="curveGrad" x1="0" y1="0" x2="0" y2="520" gradientUnits="userSpaceOnUse"><stop offset="0%" stopColor="#c9a84c" stopOpacity="0.06"/><stop offset="100%" stopColor="#c9a84c" stopOpacity="0"/></linearGradient>
+              <clipPath id="clip1"><rect width="1440" height="520"/></clipPath>
+            </defs>
+            <rect width="1440" height="520" fill="url(#bg1)"/>
+            <rect x="0" y="100" width="68" height="420" fill="url(#barGrad)" opacity="0.25"/><rect x="72" y="130" width="68" height="390" fill="url(#barGrad)" opacity="0.24"/><rect x="144" y="150" width="68" height="370" fill="url(#barGrad)" opacity="0.23"/><rect x="216" y="165" width="68" height="355" fill="url(#barGrad)" opacity="0.21"/><rect x="288" y="190" width="68" height="330" fill="url(#barGrad)" opacity="0.20"/><rect x="360" y="220" width="68" height="300" fill="url(#barGrad)" opacity="0.20"/><rect x="432" y="255" width="68" height="265" fill="url(#barGrad)" opacity="0.19"/><rect x="504" y="290" width="68" height="230" fill="url(#barGrad)" opacity="0.18"/><rect x="576" y="330" width="68" height="190" fill="url(#barGrad)" opacity="0.17"/><rect x="648" y="368" width="68" height="152" fill="url(#barGrad)" opacity="0.16"/><rect x="720" y="404" width="68" height="116" fill="url(#barGrad)" opacity="0.15"/><rect x="792" y="436" width="68" height="84" fill="url(#barGrad)" opacity="0.14"/><rect x="864" y="462" width="68" height="58" fill="url(#barGrad)" opacity="0.14"/><rect x="936" y="484" width="68" height="36" fill="url(#barGrad)" opacity="0.12"/><rect x="1008" y="498" width="68" height="22" fill="url(#barGrad)" opacity="0.11"/><rect x="1080" y="508" width="68" height="12" fill="url(#barGrad)" opacity="0.10"/><rect x="1152" y="514" width="68" height="6" fill="url(#barGrad)" opacity="0.09"/><rect x="1224" y="517" width="68" height="3" fill="url(#barGrad)" opacity="0.08"/><rect x="1296" y="518" width="68" height="2" fill="url(#barGrad)" opacity="0.06"/><rect x="1368" y="519" width="68" height="1" fill="url(#barGrad)" opacity="0.05"/>
+            <line x1="0" y1="104" x2="1440" y2="104" stroke="#1a6b7d" strokeWidth="1" opacity="0.3"/><line x1="0" y1="208" x2="1440" y2="208" stroke="#1a6b7d" strokeWidth="1" opacity="0.3"/><line x1="0" y1="312" x2="1440" y2="312" stroke="#1a6b7d" strokeWidth="1" opacity="0.3"/><line x1="0" y1="416" x2="1440" y2="416" stroke="#1a6b7d" strokeWidth="1" opacity="0.3"/>
+            <path d="M 0 520 C 200 440, 400 320, 600 200 S 900 50, 1440 15 L 1440 520 Z" fill="url(#curveGrad)" clipPath="url(#clip1)"/>
+            <path d="M 0 520 C 200 440, 400 320, 600 200 S 900 50, 1440 15" stroke="#c9a84c" strokeWidth="1.5" strokeOpacity="0.35" fill="none" clipPath="url(#clip1)"/>
+            <circle cx="240" cy="380" r="6" fill="#c9a84c" opacity="0.9"/><circle cx="240" cy="380" r="14" stroke="#c9a84c" strokeWidth="1" fill="none" opacity="0.3"/>
+            <circle cx="480" cy="255" r="6" fill="#c9a84c" opacity="0.9"/><circle cx="480" cy="255" r="14" stroke="#c9a84c" strokeWidth="1" fill="none" opacity="0.3"/>
+            <circle cx="720" cy="130" r="6" fill="#c9a84c" opacity="0.9"/><circle cx="720" cy="130" r="14" stroke="#c9a84c" strokeWidth="1" fill="none" opacity="0.3"/>
+            <circle cx="960" cy="52" r="6" fill="#c9a84c" opacity="0.9"/><circle cx="960" cy="52" r="14" stroke="#c9a84c" strokeWidth="1" fill="none" opacity="0.3"/>
+            <circle cx="1200" cy="20" r="6" fill="#c9a84c" opacity="0.9"/><circle cx="1200" cy="20" r="14" stroke="#c9a84c" strokeWidth="1" fill="none" opacity="0.3"/>
+          </svg>
         </div>
-      </section>
+        <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%', position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'inline-block', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: 20, padding: '5px 16px', marginBottom: 32 }}>
+            <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 13, fontWeight: 500, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'var(--font-body)' }}>{t.hero.label}</span>
+          </div>
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'clamp(40px,6vw,86px)', lineHeight: 1.0, color: 'white', marginBottom: 28, letterSpacing: '-0.03em' }}>
+            {t.hero.h1a}<br />
+            <em style={{ color: 'var(--amber)', fontStyle: 'italic' }}>{t.hero.h1b}</em>
+          </h1>
+          <p style={{ fontSize: 'clamp(16px,1.4vw,20px)', color: 'rgba(255,255,255,0.65)', maxWidth: 520, lineHeight: 1.65, marginBottom: 48, fontWeight: 300 }}>
+            {t.hero.sub}
+          </p>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+            <a href="#contact" style={{
+              background: 'var(--amber)', color: 'var(--ink)', padding: '16px 36px',
+              borderRadius: 32, fontSize: 16, fontWeight: 700, textDecoration: 'none',
+              fontFamily: 'var(--font-heading)', letterSpacing: '-0.01em',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {e.target.style.background = 'var(--amber-hover)';e.target.style.transform = 'translateY(-2px)';}}
+            onMouseLeave={(e) => {e.target.style.background = 'var(--amber)';e.target.style.transform = 'translateY(0)';}}>
+              {t.hero.cta}
+            </a>
+            <a href="#services" style={{
+              background: 'rgba(255,255,255,0.08)', color: 'white', padding: '16px 36px',
+              borderRadius: 32, fontSize: 16, fontWeight: 500, textDecoration: 'none',
+              border: '1px solid rgba(255,255,255,0.18)', fontFamily: 'var(--font-heading)',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {e.target.style.background = 'rgba(255,255,255,0.14)';e.target.style.transform = 'translateY(-2px)';}}
+            onMouseLeave={(e) => {e.target.style.background = 'rgba(255,255,255,0.08)';e.target.style.transform = 'translateY(0)';}}>
+              {t.hero.cta2}
+            </a>
+          </div>
+          {/* scroll hint */}
+          <div style={{ position: 'absolute', bottom: -60, left: 0, display: 'flex', alignItems: 'center', gap: 12, opacity: 0.4 }}>
+            <div style={{ width: 1, height: 48, background: 'rgba(255,255,255,0.4)' }} />
+            <span style={{ color: 'white', fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: 'var(--font-body)' }}>Scroll</span>
+          </div>
+        </div>
+      </section>);
 
-      <!-- ── CONTEXT ─────────────────────────────────────────── -->
-      <section id="context" class="section">
-        <div class="wrap context-grid">
+  }
+
+  if (heroStyle === 'light') {
+    return (
+      <section id="top" style={{ ...heroBase, background: 'var(--cream)' }}>
+        <div style={{ position: 'absolute', top: 0, right: 0, width: '42vw', height: '100%', background: 'var(--teal)', clipPath: 'polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%)', opacity: 0.06, pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, alignItems: 'center' }}>
           <div>
-            <span class="eyebrow" data-i18n="ctx_tag">Context</span>
-            <h2 class="context-title" data-i18n="ctx_h2">Llegir el moment polític és la base de qualsevol estratègia guanyadora.</h2>
-          </div>
-          <div class="context-body">
-            <p data-i18n="ctx_p">Treballem en entorns polítics complexos, amb governs consolidats, escenaris fragmentats i competència intensa. En aquest context, construir lideratge, relat i posició és clau per esdevenir alternativa real de govern o per exercir una incidència útil i reconeixible.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- ── SERVICES ────────────────────────────────────────── -->
-      <section id="serveis" class="section">
-        <div class="wrap">
-          <div class="services-head">
-            <span class="eyebrow" data-i18n="svc_tag">Serveis</span>
-            <h2 data-i18n="svc_h2">Estratègia, relat i execució.</h2>
-          </div>
-
-          <div class="services-grid">
-            <article class="service-card">
-              <span class="service-num" aria-hidden="true">01</span>
-              <h3 data-i18n="s1_title">Estratègia política</h3>
-              <p data-i18n="s1_text">Diagnòstic, posicionament i arquitectura de relat per a moments que demanen lectura fina, decisió clara i visió de conjunt.</p>
-            </article>
-
-            <article class="service-card">
-              <span class="service-num" aria-hidden="true">02</span>
-              <h3 data-i18n="s2_title">Campanyes electorals</h3>
-              <p data-i18n="s2_text">Missatge, ritme, planificació i mobilització per convertir context en oportunitat i vot en majoria.</p>
-            </article>
-
-            <article class="service-card">
-              <span class="service-num" aria-hidden="true">03</span>
-              <h3 data-i18n="s3_title">Incidència i reputació</h3>
-              <p data-i18n="s3_text">Acompanyem organitzacions i lideratges a moure agenda, construir legitimitat i activar aliances sòlides.</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <!-- ── METHOD ──────────────────────────────────────────── -->
-      <section id="metode" class="section">
-        <div class="wrap">
-          <div class="method-header">
-            <div>
-              <span class="eyebrow" data-i18n="met_tag">Mètode</span>
-              <h2 data-i18n="met_h2">Acompanyament estratègic continuat.</h2>
+            <div style={{ display: 'inline-block', background: 'rgba(19,79,92,0.08)', borderRadius: 20, padding: '5px 16px', marginBottom: 32 }}>
+              <span style={{ color: 'var(--teal)', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'var(--font-body)', fontSize: "12px" }}>{t.hero.label}</span>
             </div>
-            <p class="method-lead" data-i18n="met_lead">Treballem amb presència periòdica, seguiment constant i sessions de treball amb equips polítics i lideratges per garantir continuïtat, capacitat de decisió i adaptació al context.</p>
-          </div>
-
-          <div class="method-grid">
-            <div class="method-item">
-              <span class="method-num" aria-hidden="true">01</span>
-              <h3 data-i18n="m1_title">Diagnosi i alineament</h3>
-              <p data-i18n="m1_text">Sessions inicials per ordenar context, objectius, hipòtesis i prioritats polítiques.</p>
-            </div>
-
-            <div class="method-item">
-              <span class="method-num" aria-hidden="true">02</span>
-              <h3 data-i18n="m2_title">Relat i posicionament</h3>
-              <p data-i18n="m2_text">Construcció d'un marc de relat clar, diferencial i útil per a cada projecte.</p>
-            </div>
-
-            <div class="method-item">
-              <span class="method-num" aria-hidden="true">03</span>
-              <h3 data-i18n="m3_title">Seguiment i execució</h3>
-              <p data-i18n="m3_text">Acompanyament sostingut per convertir estratègia en moviment, agenda i decisió.</p>
+            <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'clamp(40px,5.5vw,80px)', lineHeight: 1.0, color: 'var(--teal-dark)', marginBottom: 28, letterSpacing: '-0.03em' }}>
+              {t.hero.h1a}<br />
+              <span style={{ color: 'var(--amber)' }}>{t.hero.h1b}</span>
+            </h1>
+            <p style={{ fontSize: 'clamp(15px,1.3vw,18px)', color: 'var(--ink-mid)', maxWidth: 460, lineHeight: 1.65, marginBottom: 48, fontWeight: 300 }}>
+              {t.hero.sub}
+            </p>
+            <div style={{ display: 'flex', gap: 16 }}>
+              <a href="#contact" style={{ background: 'var(--teal)', color: 'white', padding: '15px 34px', borderRadius: 32, fontSize: 16, fontWeight: 700, textDecoration: 'none', fontFamily: 'var(--font-heading)', transition: 'all 0.2s' }}
+              onMouseEnter={(e) => {e.target.style.background = 'var(--teal-dark)';e.target.style.transform = 'translateY(-2px)';}}
+              onMouseLeave={(e) => {e.target.style.background = 'var(--teal)';e.target.style.transform = 'translateY(0)';}}>
+                {t.hero.cta}
+              </a>
+              <a href="#services" style={{ background: 'transparent', color: 'var(--teal)', padding: '15px 34px', borderRadius: 32, fontSize: 15, fontWeight: 500, textDecoration: 'none', border: '1.5px solid var(--teal)', fontFamily: 'var(--font-heading)', transition: 'all 0.2s' }}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(19,79,92,0.05)'}
+              onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                {t.hero.cta2}
+              </a>
             </div>
           </div>
-        </div>
-      </section>
-
-      <!-- ── CONTACT ──────────────────────────────────────────── -->
-      <section id="contacte" class="section">
-        <div class="contact-inner">
-          <span class="eyebrow" data-i18n="cta_tag">Contacte</span>
-          <p class="contact-pre" data-i18n="cta_pre">Tens un projecte.</p>
-          <h2 class="contact-title" data-i18n="cta_title">Parlem.</h2>
-
-          <form class="contact-form" id="contact-form" novalidate>
-            <!-- Web3Forms: obté la teva clau a https://web3forms.com introduint info@thinkoclock.eu -->
-            <input type="hidden" name="access_key" value="c2fe4d1e-b623-4fc9-8dd3-1adc05cede4c">
-            <input type="hidden" name="subject"    value="Nou contacte — Think O'Clock">
-            <input type="hidden" name="from_name"  value="Think O'Clock Web">
-            <!-- honeypot anti-spam -->
-            <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
-
-            <div class="form-row">
-              <div class="field">
-                <label for="cf-name"  data-i18n="f_name_label">Nom</label>
-                <input  id="cf-name"  type="text"  name="name"    required autocomplete="name">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {[{ n: '+70', l: t.about.stats[0].label }, { n: '+10', l: t.about.stats[1].label }, { n: '5', l: t.about.stats[2].label }].map((s, i) =>
+            <div key={i} style={{ background: 'white', borderRadius: 16, padding: '24px 28px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 20 }}>
+                <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 40, color: 'var(--teal)', lineHeight: 1 }}>{s.n}</span>
+                <span style={{ color: 'var(--ink-mid)', fontSize: 15, lineHeight: 1.4 }}>{s.l}</span>
               </div>
-              <div class="field">
-                <label for="cf-email" data-i18n="f_email_label">Correu electrònic</label>
-                <input  id="cf-email" type="email" name="email"   required autocomplete="email">
+            )}
+          </div>
+        </div>
+      </section>);
+
+  }
+
+  // split
+  return (
+    <section id="top" style={{ ...heroBase, background: 'var(--teal-dark)', padding: 0, minHeight: '100vh' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', width: '100%', minHeight: '100vh' }}>
+        <div style={{ background: 'var(--teal-dark)', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '120px 5vw 80px 5vw', position: 'relative' }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px)', backgroundSize: '50px 50px', pointerEvents: 'none' }} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', fontFamily: 'var(--font-body)', display: 'block', marginBottom: 28 }}>{t.hero.label}</span>
+            <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'clamp(40px,4.5vw,72px)', lineHeight: 1.05, color: 'white', marginBottom: 28, letterSpacing: '-0.03em' }}>
+              {t.hero.h1a}<br />
+              <span style={{ color: 'var(--amber)' }}>{t.hero.h1b}</span>
+            </h1>
+            <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.6)', maxWidth: 440, lineHeight: 1.65, marginBottom: 44, fontWeight: 300 }}>{t.hero.sub}</p>
+            <a href="#contact" style={{ display: 'inline-block', background: 'var(--amber)', color: 'var(--ink)', padding: '15px 34px', borderRadius: 32, fontSize: 16, fontWeight: 700, textDecoration: 'none', fontFamily: 'var(--font-heading)', transition: 'all 0.2s' }}
+            onMouseEnter={(e) => {e.target.style.background = 'var(--amber-hover)';e.target.style.transform = 'translateY(-2px)';}}
+            onMouseLeave={(e) => {e.target.style.background = 'var(--amber)';e.target.style.transform = 'translateY(0)';}}>
+              {t.hero.cta}
+            </a>
+          </div>
+        </div>
+        <div style={{ background: 'var(--teal)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 280, height: 280, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', position: 'absolute', top: '-10%', right: '-10%' }} />
+          <div style={{ width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', position: 'absolute', bottom: '15%', left: '5%' }} />
+          <div style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+            <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 14, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)', marginBottom: 40 }}>Jordi Crisol</div>
+            <div style={{ width: 200, height: 260, background: 'rgba(255,255,255,0.08)', borderRadius: 120, margin: '0 auto 32px', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 8 }}>
+              <span style={{ fontSize: 11, fontFamily: 'var(--font-body)', color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em' }}>FOTO</span>
+              <span style={{ fontSize: 10, fontFamily: 'var(--font-body)', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>retrat professional</span>
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontWeight: 300 }}>Politòleg · Consultor Polític</div>
+          </div>
+        </div>
+      </div>
+    </section>);
+
+}
+
+// ── CONTEXT ──────────────────────────────────────────────────────────
+function Context({ t }) {
+  return (
+    <section id="context" style={{ background: 'var(--cream)', padding: '64px 5vw' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 80, alignItems: 'start' }}>
+        <div>
+          <span style={{ color: 'var(--teal)', fontSize: 12, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'var(--font-body)', display: 'block', paddingTop: 6 }}>{t.context.label}</span>
+        </div>
+        <div>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 'clamp(24px,2.8vw,42px)', color: 'var(--ink)', letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 28, fontStyle: 'italic' }}>{t.context.title}</h2>
+          <p style={{ fontSize: 18, lineHeight: 1.75, color: 'var(--ink-mid)', fontWeight: 300, maxWidth: 620 }}>{t.context.body}</p>
+        </div>
+      </div>
+    </section>);
+
+}
+
+// ── MÈTODE ──────────────────────────────────────────────────────────
+function Method({ t }) {
+  return (
+    <section id="method" style={{ background: 'var(--teal-dark)', padding: '64px 5vw' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 80, alignItems: 'start', marginBottom: 64 }}>
+          <div>
+            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'var(--font-body)', display: 'block', paddingTop: 6 }}>{t.method.label}</span>
+          </div>
+          <div>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 'clamp(24px,2.8vw,42px)', color: 'white', letterSpacing: '-0.02em', lineHeight: 1.2, marginBottom: 24 }}>{t.method.title}</h2>
+            <p style={{ fontSize: 17, lineHeight: 1.75, color: 'rgba(255,255,255,0.6)', fontWeight: 300, maxWidth: 580 }}>{t.method.body}</p>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 2 }}>
+          {t.method.steps.map((step, i) =>
+          <div key={i} style={{
+            background: i === 0 ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.05)',
+            padding: '40px 36px',
+            borderRadius: i === 0 ? '14px 0 0 14px' : i === 2 ? '0 14px 14px 0' : 0,
+            borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+            transition: 'background 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.13)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = i === 0 ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.05)'}>
+            
+              <div style={{ fontFamily: 'var(--font-heading)', fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.35)', marginBottom: 20, letterSpacing: '0.08em' }}>{step.num}</div>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 20, color: 'white', marginBottom: 14, lineHeight: 1.25 }}>{step.title}</h3>
+              <p style={{ fontSize: 15, lineHeight: 1.65, color: 'rgba(255,255,255,0.6)', fontWeight: 300 }}>{step.desc}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>);
+
+}
+
+// ── SERVICES ──────────────────────────────────────────────────────────
+function Services({ t }) {
+  const [active, setActive] = useState(0);
+  return (
+    <section id="services" style={{ background: 'white', padding: '64px 5vw' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 64, flexWrap: 'wrap', gap: 24 }}>
+          <div>
+            <span style={{ color: 'var(--teal)', fontSize: 12, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'var(--font-body)', display: 'block', marginBottom: 16 }}>{t.services.label}</span>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'clamp(32px,4vw,56px)', color: 'var(--ink)', letterSpacing: '-0.02em', lineHeight: 1.05 }}>{t.services.title}</h2>
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 2 }}>
+          {t.services.items.map((item, i) =>
+          <div key={i}
+          style={{
+            background: active === i ? 'var(--teal)' : 'var(--cream)',
+            padding: '44px 40px', cursor: 'pointer',
+            transition: 'background 0.25s',
+            borderRadius: i === 0 ? '16px 0 0 16px' : i === 2 ? '0 16px 16px 0' : 0,
+            borderLeft: i > 0 ? '1px solid rgba(0,0,0,0.05)' : 'none'
+          }}
+          onMouseEnter={() => setActive(i)}>
+            
+              <div style={{ fontFamily: 'var(--font-heading)', fontSize: 13, fontWeight: 600, letterSpacing: '0.1em', color: active === i ? 'rgba(255,255,255,0.45)' : 'var(--ink-light)', marginBottom: 20 }}>{item.num}</div>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 22, color: active === i ? 'white' : 'var(--ink)', marginBottom: 16, lineHeight: 1.2 }}>{item.title}</h3>
+              <p style={{ fontSize: 15, lineHeight: 1.65, color: active === i ? 'rgba(255,255,255,0.7)' : 'var(--ink-mid)', fontWeight: 300 }}>{item.desc}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>);
+
+}
+
+// ── ABOUT ──────────────────────────────────────────────────────────────
+function About({ t }) {
+  return (
+    <section id="about" style={{ background: 'var(--cream)', padding: '64px 5vw' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'start' }}>
+        <div>
+          <span style={{ color: 'var(--teal)', fontSize: 12, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'var(--font-body)', display: 'block', marginBottom: 16 }}>{t.about.label}</span>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'clamp(28px,3.5vw,52px)', color: 'var(--ink)', letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 28, whiteSpace: 'pre-line' }}>{t.about.title}</h2>
+          <p style={{ fontSize: 16, lineHeight: 1.75, color: 'var(--ink-mid)', marginBottom: 20, fontWeight: 300 }}>{t.about.bio}</p>
+          <p style={{ fontSize: 16, lineHeight: 1.75, color: 'var(--ink-mid)', marginBottom: 28, fontWeight: 300 }}>{t.about.bio2}</p>
+          {/* Stats row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
+            {t.about.stats.map((s, i) =>
+            <div key={i} style={{ background: 'white', borderRadius: 14, padding: '20px 12px', textAlign: 'center', border: '1px solid var(--border)' }}>
+                <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 34, color: 'var(--teal)', lineHeight: 1 }}>{s.n}</div>
+                <div style={{ fontSize: 12, color: 'var(--ink-light)', marginTop: 8, lineHeight: 1.4 }}>{s.label}</div>
+              </div>
+            )}
+          </div>
+        </div>
+        <div>
+          {/* Team cards */}
+          {t.about.team.map((person, idx) =>
+          <div key={idx} style={{ background: 'white', borderRadius: 20, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: 16 }}>
+              <div style={{ background: 'var(--teal)', height: 6 }} />
+              <div style={{ padding: '28px 32px', display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+                <div style={{ width: 90, height: 120, borderRadius: 12, overflow: 'hidden', flexShrink: 0, border: '2px solid var(--border)' }}>
+                  <img src={person.img} alt={person.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: person.pos }} />
+                </div>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 19, color: 'var(--ink)', marginBottom: 3 }}>{person.name}</div>
+                  <div style={{ fontSize: 12, color: 'var(--teal)', fontWeight: 500, letterSpacing: '0.04em', marginBottom: 10 }}>{person.role}</div>
+                  <p style={{ fontSize: 13, color: 'var(--ink-light)', lineHeight: 1.55, fontWeight: 300 }}>{person.desc}</p>
+                </div>
               </div>
             </div>
+          )}
+        </div>
+      </div>
+    </section>);
 
-            <div class="field">
-              <label for="cf-msg" data-i18n="f_msg_label">Missatge</label>
-              <textarea id="cf-msg"   name="message" rows="5"     required></textarea>
+}
+
+// ── CONTACT ──────────────────────────────────────────────────────────
+function Contact({ t }) {
+  const [sent, setSent] = useState(false);
+  const fieldStyle = {
+    width: '100%', padding: '14px 18px', background: 'var(--cream)', border: '1.5px solid var(--border)',
+    borderRadius: 10, fontSize: 15, fontFamily: 'var(--font-body)', color: 'var(--ink)', outline: 'none',
+    transition: 'border-color 0.2s'
+  };
+  return (
+    <section id="contact" style={{ background: 'var(--teal-dark)', padding: '64px 5vw' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'start' }}>
+        <div>
+          <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', fontFamily: 'var(--font-body)', display: 'block', marginBottom: 16 }}>{t.contact.label}</span>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 'clamp(40px,5vw,80px)', color: 'white', letterSpacing: '-0.03em', lineHeight: 1.0, marginBottom: 24 }}>{t.contact.title}</h2>
+          <p style={{ fontSize: 17, lineHeight: 1.7, color: 'rgba(255,255,255,0.6)', fontWeight: 300, marginBottom: 48, maxWidth: 400 }}>{t.contact.sub}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {t.contact.info.map((info, i) =>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ color: 'var(--amber)', fontSize: 14 }}>
+                    {i === 0 ? '📍' : i === 1 ? '✉' : '🌐'}
+                  </span>
+                </div>
+                <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 14 }}>{info}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        <div style={{ background: 'white', borderRadius: 20, padding: '40px 44px' }}>
+          {!sent ?
+          <form onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.target;
+              const name = form.querySelector('input[type=text], input:not([type])').value;
+              const email = form.querySelector('input[type=email]').value;
+              const msg = form.querySelector('textarea').value;
+              try {
+                const res = await fetch('https://api.web3forms.com/submit', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                  body: JSON.stringify({
+                    access_key: 'c2fe4d1e-b623-4fc9-8dd3-1adc05cede4c',
+                    subject: "Nou contacte — Think O'Clock",
+                    name,
+                    email,
+                    message: msg,
+                  }),
+                });
+                const json = await res.json();
+                if (json.success) setSent(true);
+              } catch (_) {}
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <input placeholder={t.contact.name} required style={fieldStyle}
+              onFocus={(e) => e.target.style.borderColor = 'var(--teal)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border)'} />
+                <input type="email" placeholder={t.contact.email} required style={fieldStyle}
+              onFocus={(e) => e.target.style.borderColor = 'var(--teal)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border)'} />
+                <textarea rows={5} placeholder={t.contact.msg} required style={{ ...fieldStyle, resize: 'vertical' }}
+              onFocus={(e) => e.target.style.borderColor = 'var(--teal)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border)'} />
+                <button type="submit" style={{
+                background: 'var(--teal)', color: 'white', border: 'none', padding: '16px',
+                borderRadius: 10, fontSize: 16, fontWeight: 700, cursor: 'pointer',
+                fontFamily: 'var(--font-heading)', transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {e.target.style.background = 'var(--teal-dark)';e.target.style.transform = 'translateY(-1px)';}}
+              onMouseLeave={(e) => {e.target.style.background = 'var(--teal)';e.target.style.transform = 'translateY(0)';}}>
+                  {t.contact.send}
+                </button>
+              </div>
+            </form> :
+
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+              <div style={{ fontSize: 40, marginBottom: 16 }}>✓</div>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 22, color: 'var(--teal)', marginBottom: 12 }}>Missatge enviat!</h3>
+              <p style={{ color: 'var(--ink-mid)', fontSize: 15 }}>Ens posarem en contacte aviat.</p>
             </div>
-
-            <button type="submit" class="btn btn-primary form-submit" id="cf-submit">
-              <span data-i18n="f_send">Enviar missatge</span>
-            </button>
-
-            <div class="form-feedback" id="cf-feedback" role="status"></div>
-          </form>
+          }
         </div>
-      </section>
+      </div>
+    </section>);
 
-    </main>
+}
 
-    <!-- ── FOOTER ───────────────────────────────────────────── -->
-    <footer>
-      <div class="wrap">
-        <div class="footer-left">
-          <span class="footer-brand">Think O'Clock</span>
-          <span class="footer-desc" data-i18n="ft_desc">Consultoria política</span>
+// ── FOOTER ──────────────────────────────────────────────────────────
+function Footer({ t }) {
+  const [showLegal, setShowLegal] = React.useState(false);
+  return (
+    <>
+    <footer style={{ background: '#0a2930', padding: '40px 5vw', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+        <Logo white />
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>{t.footer.rights}</span>
+          <button onClick={() => setShowLegal(true)} style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'var(--font-body)' }}>{t.footer.legal}</button>
         </div>
-        <span class="footer-copy" data-i18n="ft_copy">© 2025 Think O'Clock</span>
       </div>
     </footer>
+    {showLegal && (
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5vw' }} onClick={() => setShowLegal(false)}>
+        <div style={{ background: 'white', borderRadius: 20, padding: '48px 52px', maxWidth: 720, width: '100%', maxHeight: '80vh', overflowY: 'auto', position: 'relative' }} onClick={e => e.stopPropagation()}>
+          <button onClick={() => setShowLegal(false)} style={{ position: 'absolute', top: 20, right: 24, background: 'none', border: 'none', fontSize: 22, cursor: 'pointer', color: 'var(--ink-light)' }}>✕</button>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 32, color: 'var(--teal)', marginBottom: 24 }}>{t.footer.legal}</h2>
+          <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 8 }}>{t.footer.legalContent.titular}</h3>
+          <p style={{ fontSize: 14, color: 'var(--ink-mid)', lineHeight: 1.7, marginBottom: 20 }}>Think O'Clock SL<br/>{t.footer.legalContent.nif}: B66644915<br/>Passatge Permanyer 2, 08009 Barcelona<br/>info@thinkoclock.eu<br/>thinkoclock.eu</p>
+          <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 8 }}>{t.footer.legalContent.conditions}</h3>
+          <p style={{ fontSize: 14, color: 'var(--ink-mid)', lineHeight: 1.7, marginBottom: 20 }}>{t.footer.legalContent.conditionsText}</p>
+          <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 8 }}>{t.footer.legalContent.ip}</h3>
+          <p style={{ fontSize: 14, color: 'var(--ink-mid)', lineHeight: 1.7, marginBottom: 20 }}>{t.footer.legalContent.ipText}</p>
+          <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 8 }}>{t.footer.legalContent.gdpr}</h3>
+          <p style={{ fontSize: 14, color: 'var(--ink-mid)', lineHeight: 1.7, marginBottom: 20 }}>{t.footer.legalContent.gdprText}</p>
+          <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 8 }}>{t.footer.legalContent.law}</h3>
+          <p style={{ fontSize: 14, color: 'var(--ink-mid)', lineHeight: 1.7 }}>{t.footer.legalContent.lawText}</p>
+        </div>
+      </div>
+    )}
+    </>
+  );
+}
 
-    <!-- ── I18N ─────────────────────────────────────────────── -->
-    <script>
-      const T = {
-        ca: {
-          nav_context:  'Context',
-          nav_services: 'Serveis',
-          nav_method:   'Mètode',
-          nav_contact:  'Contacte',
+// ── APP ──────────────────────────────────────────────────────────────
+function App() {
+  const savedLang = localStorage.getItem('toc_lang') || 'ca';
+  const savedTweaks = (() => {try {return JSON.parse(localStorage.getItem('toc_tweaks')) || TWEAK_DEFAULTS;} catch (e) {return TWEAK_DEFAULTS;}})();
 
-          hero_tag:  'Consultoria política',
-          hero_h1:   'Estratègia política per guanyar context, relat i eleccions.',
-          hero_lead: 'Think O\'Clock és una consultora especialitzada en estratègia política i electoral. Acompanyem lideratges, equips i organitzacions per convertir context en decisió, relat en posició i campanya en resultat.',
-          hero_cta1: 'Parlem',
-          hero_cta2: 'Veure serveis',
+  const [lang, setLang] = useState(savedLang);
+  const [tweaks, setTweaks] = useState(savedTweaks);
+  const t = COPY[lang];
 
-          ctx_tag: 'Context',
-          ctx_h2:  'Llegir el moment polític és la base de qualsevol estratègia guanyadora.',
-          ctx_p:   'Treballem en entorns polítics complexos, amb governs consolidats, escenaris fragmentats i competència intensa. En aquest context, construir lideratge, relat i posició és clau per esdevenir alternativa real de govern o per exercir una incidència útil i reconeixible.',
+  useEffect(() => {localStorage.setItem('toc_lang', lang);}, [lang]);
 
-          svc_tag: 'Serveis',
-          svc_h2:  'Estratègia, relat i execució.',
-          s1_title: 'Estratègia política',
-          s1_text:  'Diagnòstic, posicionament i arquitectura de relat per a moments que demanen lectura fina, decisió clara i visió de conjunt.',
-          s2_title: 'Campanyes electorals',
-          s2_text:  'Missatge, ritme, planificació i mobilització per convertir context en oportunitat i vot en majoria.',
-          s3_title: 'Incidència i reputació',
-          s3_text:  'Acompanyem organitzacions i lideratges a moure agenda, construir legitimitat i activar aliances sòlides.',
+  // Expose tweaks setters to plain JS
+  useEffect(() => {
+    window.__setTweak = (key, val) => {
+      setTweaks((prev) => {
+        const next = { ...prev, [key]: val };
+        localStorage.setItem('toc_tweaks', JSON.stringify(next));
+        window.parent.postMessage({ type: '__edit_mode_set_keys', edits: next }, '*');
+        return next;
+      });
+    };
+    // sync current values to controls
+    const hs = document.getElementById('tw-hero');
+    const ds = document.getElementById('tw-density');
+    if (hs) hs.value = tweaks.heroStyle;
+    if (ds) ds.value = tweaks.density;
+    document.querySelectorAll('.tweak-swatch').forEach((s) => {
+      s.classList.toggle('active', s.style.background === tweaks.accentColor || s.style.background.replace(/\s/g, '') === tweaks.accentColor.replace(/\s/g, ''));
+    });
+    // apply density
+    document.documentElement.style.setProperty('--section-pad', tweaks.density === 'compact' ? '64px' : '100px');
+  }, [tweaks]);
 
-          met_tag:  'Mètode',
-          met_h2:   'Acompanyament estratègic continuat.',
-          met_lead: 'Treballem amb presència periòdica, seguiment constant i sessions de treball amb equips polítics i lideratges per garantir continuïtat, capacitat de decisió i adaptació al context.',
-          m1_title: 'Diagnosi i alineament',
-          m1_text:  'Sessions inicials per ordenar context, objectius, hipòtesis i prioritats polítiques.',
-          m2_title: 'Relat i posicionament',
-          m2_text:  'Construcció d\'un marc de relat clar, diferencial i útil per a cada projecte.',
-          m3_title: 'Seguiment i execució',
-          m3_text:  'Acompanyament sostingut per convertir estratègia en moviment, agenda i decisió.',
-
-          cta_tag:   'Contacte',
-          cta_pre:   'Tens un projecte.',
-          cta_title: 'Parlem.',
-
-          f_name_label:  'Nom',
-          f_name_ph:     'El teu nom',
-          f_email_label: 'Correu electrònic',
-          f_email_ph:    'el.teu@correu.cat',
-          f_msg_label:   'Missatge',
-          f_msg_ph:      'Explica\'ns el teu projecte...',
-          f_send:        'Enviar missatge',
-          f_sending:     'Enviant...',
-          f_ok:          'Missatge enviat. Ens posem en contacte aviat.',
-          f_err:         'Hi ha hagut un error. Prova de nou o escriu a info@thinkoclock.eu.',
-
-          ft_desc: 'Consultoria política',
-          ft_copy: '© 2025 Think O\'Clock',
-        },
-
-        es: {
-          nav_context:  'Contexto',
-          nav_services: 'Servicios',
-          nav_method:   'Método',
-          nav_contact:  'Contacto',
-
-          hero_tag:  'Consultoría política',
-          hero_h1:   'Estrategia política para ganar contexto, relato y elecciones.',
-          hero_lead: 'Think O\'Clock es una consultora especializada en estrategia política y electoral. Acompañamos liderazgos, equipos y organizaciones para convertir contexto en decisión, relato en posición y campaña en resultado.',
-          hero_cta1: 'Hablemos',
-          hero_cta2: 'Ver servicios',
-
-          ctx_tag: 'Contexto',
-          ctx_h2:  'Leer el momento político es la base de cualquier estrategia ganadora.',
-          ctx_p:   'Trabajamos en entornos políticos complejos, con gobiernos consolidados, escenarios fragmentados y competencia intensa. En este contexto, construir liderazgo, relato y posición es clave para convertirse en alternativa real de gobierno o para ejercer una incidencia útil y reconocible.',
-
-          svc_tag: 'Servicios',
-          svc_h2:  'Estrategia, relato y ejecución.',
-          s1_title: 'Estrategia política',
-          s1_text:  'Diagnóstico, posicionamiento y arquitectura de relato para momentos que exigen lectura fina, decisión clara y visión de conjunto.',
-          s2_title: 'Campañas electorales',
-          s2_text:  'Mensaje, ritmo, planificación y movilización para convertir contexto en oportunidad y voto en mayoría.',
-          s3_title: 'Incidencia y reputación',
-          s3_text:  'Acompañamos organizaciones y liderazgos a mover agenda, construir legitimidad y activar alianzas sólidas.',
-
-          met_tag:  'Método',
-          met_h2:   'Acompañamiento estratégico continuado.',
-          met_lead: 'Trabajamos con presencia periódica, seguimiento constante y sesiones de trabajo con equipos políticos y liderazgos para garantizar continuidad, capacidad de decisión y adaptación al contexto.',
-          m1_title: 'Diagnóstico y alineamiento',
-          m1_text:  'Sesiones iniciales para ordenar contexto, objetivos, hipótesis y prioridades políticas.',
-          m2_title: 'Relato y posicionamiento',
-          m2_text:  'Construcción de un marco de relato claro, diferencial y útil para cada proyecto.',
-          m3_title: 'Seguimiento y ejecución',
-          m3_text:  'Acompañamiento sostenido para convertir estrategia en movimiento, agenda y decisión.',
-
-          cta_tag:   'Contacto',
-          cta_pre:   'Tienes un proyecto.',
-          cta_title: 'Hablemos.',
-
-          f_name_label:  'Nombre',
-          f_name_ph:     'Tu nombre',
-          f_email_label: 'Correo electrónico',
-          f_email_ph:    'tu@correo.es',
-          f_msg_label:   'Mensaje',
-          f_msg_ph:      'Cuéntanos tu proyecto...',
-          f_send:        'Enviar mensaje',
-          f_sending:     'Enviando...',
-          f_ok:          'Mensaje enviado. Nos ponemos en contacto pronto.',
-          f_err:         'Ha habido un error. Inténtalo de nuevo o escribe a info@thinkoclock.eu.',
-
-          ft_desc: 'Consultoría política',
-          ft_copy: '© 2025 Think O\'Clock',
-        },
-
-        en: {
-          nav_context:  'Context',
-          nav_services: 'Services',
-          nav_method:   'Method',
-          nav_contact:  'Contact',
-
-          hero_tag:  'Political consultancy',
-          hero_h1:   'Political strategy to win context, narrative and elections.',
-          hero_lead: 'Think O\'Clock is a consultancy specialised in political strategy and electoral campaigns. We accompany leaders, teams and organisations to turn context into decision, narrative into position and campaign into result.',
-          hero_cta1: 'Let\'s talk',
-          hero_cta2: 'Our services',
-
-          ctx_tag: 'Context',
-          ctx_h2:  'Reading the political moment is the foundation of any winning strategy.',
-          ctx_p:   'We work in complex political environments, with consolidated governments, fragmented scenarios and intense competition. In this context, building leadership, narrative and position is key to becoming a real governing alternative or to exerting useful and recognisable influence.',
-
-          svc_tag: 'Services',
-          svc_h2:  'Strategy, narrative and execution.',
-          s1_title: 'Political strategy',
-          s1_text:  'Diagnosis, positioning and narrative architecture for moments that demand sharp reading, clear decisions and an overview.',
-          s2_title: 'Electoral campaigns',
-          s2_text:  'Message, rhythm, planning and mobilisation to turn context into opportunity and votes into majorities.',
-          s3_title: 'Advocacy & reputation',
-          s3_text:  'We accompany organisations and leaders in moving agendas, building legitimacy and activating solid alliances.',
-
-          met_tag:  'Method',
-          met_h2:   'Sustained strategic accompaniment.',
-          met_lead: 'We work with periodic presence, constant follow-up and working sessions with political teams and leaders to ensure continuity, decision-making capacity and adaptation to context.',
-          m1_title: 'Diagnosis & alignment',
-          m1_text:  'Initial sessions to organise context, objectives, hypotheses and political priorities.',
-          m2_title: 'Narrative & positioning',
-          m2_text:  'Building a clear, differential and useful narrative framework for each project.',
-          m3_title: 'Monitoring & execution',
-          m3_text:  'Sustained accompaniment to turn strategy into movement, agenda and decision.',
-
-          cta_tag:   'Contact',
-          cta_pre:   'You have a project.',
-          cta_title: 'Let\'s talk.',
-
-          f_name_label:  'Name',
-          f_name_ph:     'Your name',
-          f_email_label: 'Email address',
-          f_email_ph:    'your@email.com',
-          f_msg_label:   'Message',
-          f_msg_ph:      'Tell us about your project...',
-          f_send:        'Send message',
-          f_sending:     'Sending...',
-          f_ok:          'Message sent. We\'ll be in touch soon.',
-          f_err:         'There was an error. Please try again or write to info@thinkoclock.eu.',
-
-          ft_desc: 'Political consultancy',
-          ft_copy: '© 2025 Think O\'Clock',
-        },
-      };
-
-      function setLang(lang) {
-        document.querySelectorAll('[data-i18n]').forEach(function (el) {
-          var key = el.getAttribute('data-i18n');
-          if (T[lang] && T[lang][key]) el.textContent = T[lang][key];
-        });
-        // update placeholders
-        var fields = {
-          'cf-name':  'f_name_ph',
-          'cf-email': 'f_email_ph',
-          'cf-msg':   'f_msg_ph',
-        };
-        Object.keys(fields).forEach(function (id) {
-          var el = document.getElementById(id);
-          if (el && T[lang][fields[id]]) el.placeholder = T[lang][fields[id]];
-        });
-        document.querySelectorAll('.lang-btn').forEach(function (btn) {
-          btn.classList.remove('active');
-        });
-        var activeBtn = document.getElementById('btn-' + lang);
-        if (activeBtn) activeBtn.classList.add('active');
-        document.documentElement.lang = lang;
+  // Listen for host messages
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.data?.type === '__activate_edit_mode') {
+        document.getElementById('tweaks-panel').classList.add('visible');
+      } else if (e.data?.type === '__deactivate_edit_mode') {
+        document.getElementById('tweaks-panel').classList.remove('visible');
       }
+    };
+    window.addEventListener('message', handler);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', handler);
+  }, []);
 
-      // init placeholders on load
-      setLang('ca');
-      // restore to default active state (setLang already called above sets CA active)
+  // Update CSS accent
+  useEffect(() => {
+    document.documentElement.style.setProperty('--amber', tweaks.accentColor);
+  }, [tweaks.accentColor]);
 
-      // ── CONTACT FORM SUBMISSION ─────────────────────────────
-      (function () {
-        var form     = document.getElementById('contact-form');
-        var feedback = document.getElementById('cf-feedback');
-        var submitBtn = document.getElementById('cf-submit');
-        var submitLabel = submitBtn.querySelector('[data-i18n]');
+  return (
+    <div>
+      <Nav lang={lang} setLang={setLang} t={t} heroStyle={tweaks.heroStyle} />
+      <Hero t={t} heroStyle={tweaks.heroStyle} />
+      <Context t={t} />
+      <Services t={t} />
+      <Method t={t} />
+      <About t={t} />
+      <Contact t={t} />
+      <Footer t={t} />
+    </div>);
 
-        form.addEventListener('submit', async function (e) {
-          e.preventDefault();
-          var lang = document.documentElement.lang || 'ca';
+}
 
-          // basic client-side validation
-          if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-          }
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
 
-          submitLabel.textContent = T[lang].f_sending;
-          submitBtn.disabled = true;
-          feedback.style.display = 'none';
-          feedback.className = 'form-feedback';
-
-          try {
-            var res = await fetch('https://api.web3forms.com/submit', {
-              method: 'POST',
-              body: new FormData(form),
-            });
-            var json = await res.json();
-
-            if (json.success) {
-              feedback.textContent = T[lang].f_ok;
-              feedback.className = 'form-feedback ok';
-              feedback.style.display = 'block';
-              form.reset();
-            } else {
-              throw new Error(json.message || 'error');
-            }
-          } catch (_) {
-            feedback.textContent = T[lang].f_err;
-            feedback.className = 'form-feedback err';
-            feedback.style.display = 'block';
-          } finally {
-            submitLabel.textContent = T[lang].f_send;
-            submitBtn.disabled = false;
-          }
-        });
-      })();
-    </script>
-  </body>
+<script>
+function applyTweaks() {
+  const heroVal = document.getElementById('tw-hero').value;
+  const densityVal = document.getElementById('tw-density').value;
+  if (window.__setTweak) {
+    window.__setTweak('heroStyle', heroVal);
+    window.__setTweak('density', densityVal);
+  }
+}
+function setAccent(el, color) {
+  document.querySelectorAll('.tweak-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  if (window.__setTweak) window.__setTweak('accentColor', color);
+}
+</script>
+</body>
 </html>
